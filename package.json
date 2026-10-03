@@ -5,6 +5,8 @@
 	"description": "The 503 'service not ready' fallback page, as a hardened Caddy image.",
 	"license": "GPL-3.0-only",
 	"scripts": {
+		"build": "bun scripts/build-pages.ts",
+		"build:check": "bun scripts/build-pages.ts --check",
 		"format": "biome check --write .",
 		"lint": "biome check .",
 		"screenshot": "bun scripts/screenshot.ts",

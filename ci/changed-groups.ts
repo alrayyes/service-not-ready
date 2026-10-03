@@ -3,10 +3,13 @@
 // Each group lists the files its job reads, its tool config and the workflow itself.
 
 const groups = {
-	lint: [/\.(ts|json)$/, /^bun\.lock$/, /^\.editorconfig$/],
+	// pages/ and src/ are in lint because the drift test (bun test ./ci) compares them.
+	lint: [/\.(ts|json)$/, /^bun\.lock$/, /^\.editorconfig$/, /^(pages|src)\//],
 	dockerfile: [/^Dockerfile$/, /^\.dockerignore$/, /^\.hadolint\.yaml$/],
 	test: [
-		/^(Dockerfile|Caddyfile|503\.html|\.dockerignore)$/,
+		/^(Dockerfile|Caddyfile|\.dockerignore)$/,
+		/^(pages|src)\//,
+		/^scripts\/build-pages\.ts$/,
 		/^test\//,
 		/^playwright\.config\.ts$/,
 		/^package\.json$/,

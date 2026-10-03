@@ -10,7 +10,7 @@ test.beforeAll(async () => {
 test.afterAll(() => stop(c.name));
 
 test.describe("every request is a 503", () => {
-	for (const path of ["/", "/anything", "/deep/path?with=query", "/503.html", "/favicon.ico"]) {
+	for (const path of ["/", "/anything", "/deep/path?with=query", "/favicon.ico"]) {
 		test(`GET ${path}`, async ({ request }) => {
 			const res = await request.get(c.url + path);
 			expect(res.status()).toBe(503);

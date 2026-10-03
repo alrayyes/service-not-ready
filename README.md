@@ -2,7 +2,7 @@
 
 A "service not ready" page for when the thing behind your reverse proxy is still starting. It answers every request with a `503`, tells clients to retry in 30 seconds, and shows a page that checks again on its own and loads the real service the moment it stops answering 503.
 
-It's one Caddy container with the page baked in. No bind mounts, no external requests, no JavaScript or CSS from anywhere else: `503.html` is a single file.
+It's one Caddy container with the pages baked in. No bind mounts, no external requests, no JavaScript or CSS from anywhere else: each page is a single file.
 
 Image: `ghcr.io/alrayyes/service-not-ready`
 
@@ -62,6 +62,47 @@ Why each setting is there:
 | ------------- | ------- | --------------------------------------------------------------------- |
 | `LISTEN_PORT` | `8080`  | Port Caddy binds. Keep it above 1024.                                 |
 | `RETRY_AFTER` | `30`    | Seconds in the `Retry-After` header. The page polls at this interval. |
+
+## Pages for other errors
+
+The catch-all above is the default. The image also carries a page in the same look for each error a reverse proxy can produce, served at `/<name>.html`:
+
+| Path                | Meaning                           | Waits for the service?             |
+| ------------------- | --------------------------------- | ---------------------------------- |
+| `/404.html`         | No router matched the host        | no                                 |
+| `/401.html`         | Authentication required           | no                                 |
+| `/403.html`         | Access denied                     | no                                 |
+| `/429.html`         | Rate limited                      | counts down from `Retry-After`     |
+| `/500.html`         | Error from the backend            | no                                 |
+| `/502.html`         | Bad gateway                       | yes, polls and reloads             |
+| `/503.html`         | Service not ready                 | yes, polls and reloads             |
+| `/504.html`         | Gateway timeout                   | yes, polls and reloads             |
+| `/error.html`       | Any other 4xx or 5xx              | no                                 |
+
+Requested directly, these answer `200` with `Cache-Control: no-store` and the same security headers as the catch-all. Any other path still answers `503` with `Retry-After`. Only the names above are special.
+
+### With Traefik's `errors` middleware
+
+Traefik asks this service for `/{status}.html` and returns the body with the original status code, so the visitor sees a `404` page with a `404` status:
+
+```yaml
+http:
+  middlewares:
+    error-pages:
+      errors:
+        status: ["401", "403", "404", "429", "500", "502", "503", "504"]
+        service: service-not-ready
+        query: "/{status}.html"
+  services:
+    service-not-ready:
+      loadBalancer:
+        servers:
+          - url: http://service-not-ready:8080
+```
+
+List only statuses that have a page: a status like `418` would ask for `/418.html`, which isn't one, and get the `503` catch-all. For the rest of the 4xx and 5xx range, add a second `errors` middleware with `query: "/error.html"`.
+
+The polling pages (502, 503, 504) check their own URL, so they reload when the original service answers. Opened directly they get a `200`, which counts as recovered, so they reload on the next check.
 
 ## What it serves
 
