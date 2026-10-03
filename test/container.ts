@@ -42,7 +42,7 @@ export function start({ env = {}, containerPort = 8080 }: Options = {}): Running
 		`127.0.0.1::${containerPort}`,
 		IMAGE,
 	);
-	const port = docker("port", name, `${containerPort}/tcp`).split("\n")[0].split(":").pop();
+	const port = docker("port", name, `${containerPort}/tcp`).split("\n")[0]?.split(":").pop();
 	return { name, url: `http://127.0.0.1:${port}` };
 }
 
