@@ -25,6 +25,7 @@ jobs:
       lint: ${{ steps.groups.outputs.lint }}
       dockerfile: ${{ steps.groups.outputs.dockerfile }}
       test: ${{ steps.groups.outputs.test }}
+      prose: ${{ steps.groups.outputs.prose }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -40,7 +41,7 @@ jobs:
           if [ "${EVENT}" = pull_request ]; then
             git diff --name-only "${BASE}...HEAD" | bun ci/changed-groups.ts >> "$GITHUB_OUTPUT"
           else
-            printf 'lint=true\ndockerfile=true\ntest=true\n' >> "$GITHUB_OUTPUT"
+            printf 'lint=true\ndockerfile=true\ntest=true\nprose=true\n' >> "$GITHUB_OUTPUT"
           fi
 
   secrets:
@@ -72,6 +73,21 @@ jobs:
       - run: bun run typecheck
       - run: bun run sort
       - run: bun test ./ci
+
+  # Style is advice, so Vale only fails the job on its error-level rules (a product name
+  # spelled wrong); warnings print. Official image, run through the same script as a local run.
+  prose:
+    needs: changes
+    if: needs.changes.outputs.prose == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    container:
+      image: jdkato/vale:v3.24.0@sha256:f5a09410093936d4919d868120786da9789e2652ac321c66a895403eca020ae4
+      options: --entrypoint ""
+    steps:
+      - run: apk add --no-cache bash git
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - run: scripts/lint-prose.sh
 
   audit:
     runs-on: ubuntu-latest
@@ -145,7 +161,7 @@ jobs:
   # release through the API. RELEASE_TOKEN, not GITHUB_TOKEN: a pull request authored by
   # GITHUB_TOKEN sits at action_required with no checks run.
   release:
-    needs: [secrets, lint, audit, dockerfile, test]
+    needs: [secrets, lint, prose, audit, dockerfile, test]
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
     timeout-minutes: 10
