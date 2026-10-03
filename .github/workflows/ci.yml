@@ -172,7 +172,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
-      contents: read
+      contents: write
       packages: write
       id-token: write
       attestations: write
@@ -207,3 +207,17 @@ jobs:
           subject-name: ghcr.io/${{ github.repository }}
           subject-digest: ${{ steps.push.outputs.digest }}
           push-to-registry: true
+      # The README embeds releases/latest/download/screenshot.png, so each release carries a
+      # fresh shot of the image it just published and the README never needs a commit.
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: 1.4.2
+      - run: bun install --frozen-lockfile
+      - run: bunx playwright install --with-deps chromium
+      - name: Attach a screenshot to the release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          IMAGE: ghcr.io/${{ github.repository }}:${{ needs.release.outputs.tag_name }}
+        run: |
+          bun scripts/screenshot.ts screenshot.png
+          gh release upload "${{ needs.release.outputs.tag_name }}" screenshot.png --clobber
