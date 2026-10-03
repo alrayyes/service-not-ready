@@ -1,18 +1,43 @@
 # Dependabot, not Renovate: it runs natively on GitHub and needs no extra setup.
+# Prefixes keep PR titles inside commitlint and decide the release type: only what ships in
+# the image (the base image) cuts a release. Majors get their own group so they stay a PR
+# someone reads.
 version: 2
 updates:
   - package-ecosystem: "bun"
     directory: "/"
     schedule:
       interval: "weekly"
+    commit-message:
+      prefix: "fix"
+      prefix-development: "chore"
+    groups:
+      bun-minor-patch:
+        update-types: ["minor", "patch"]
+      bun-major:
+        update-types: ["major"]
 
   # Moves the caddy:2-alpine digest pin in the Dockerfile.
   - package-ecosystem: "docker"
     directory: "/"
     schedule:
       interval: "weekly"
+    commit-message:
+      prefix: "fix"
+    groups:
+      docker-minor-patch:
+        update-types: ["minor", "patch"]
+      docker-major:
+        update-types: ["major"]
 
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
+    commit-message:
+      prefix: "ci"
+    groups:
+      actions-minor-patch:
+        update-types: ["minor", "patch"]
+      actions-major:
+        update-types: ["major"]
