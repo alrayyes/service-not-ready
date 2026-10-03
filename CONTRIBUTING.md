@@ -32,6 +32,10 @@ The tests in `test/` start the image with the same flags the README documents (r
 
 `503.html` must stay one file with no external requests. A test fails on any request that leaves the origin. It also runs an axe-core scan in dark and light, with and without reduced motion.
 
+## CI path filtering
+
+On a pull request, `lint`, `dockerfile` and `test` run only when files they cover change, so a README edit builds nothing. `ci/changed-groups.ts` holds the file lists (`bun test ./ci` covers them), and editing `ci.yml` runs all three. The secret scan, audit and commit lint always run, and a push to `main` runs everything. Add a file a job reads to its list, or the job skips a change that could break it.
+
 ## Commit messages
 
 [Conventional Commits](https://www.conventionalcommits.org/), checked by commitlint in CI. Only changes to `Dockerfile`, `Caddyfile` and `503.html` ship, so only those take `feat:`, `fix:` or `perf:`. Tests, docs and CI changes are `test:`, `docs:` or `ci:` and cut no release.
