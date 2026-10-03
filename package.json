@@ -11,7 +11,8 @@
 		"lint": "biome check .",
 		"screenshot": "bun scripts/screenshot.ts",
 		"sort": "sort-package-json --check",
-		"test": "playwright test"
+		"test": "playwright test",
+		"typecheck": "tsc --noEmit"
 	},
 	"devDependencies": {
 		"@axe-core/playwright": "4.13.0",
@@ -19,8 +20,10 @@
 		"@commitlint/cli": "21.2.3",
 		"@commitlint/config-conventional": "21.2.3",
 		"@playwright/test": "1.63.0",
+		"@types/bun": "1.4.2",
 		"@types/node": "26.6.4",
-		"sort-package-json": "4.0.0"
+		"sort-package-json": "4.0.0",
+		"typescript": "7.0.2"
 	},
 	"packageManager": "bun@1.4.0"
 }
