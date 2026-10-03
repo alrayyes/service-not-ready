@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
 <meta name="color-scheme" content="dark light">
-<title>Service not ready (503)</title>
+<title>{{title}}</title>
 <style>
 :root{--bg:#0a0818;--sky:linear-gradient(#0a0818 40%,#3b0f4d 85%,#7a1b66);--card:rgba(9,8,24,.92);--ink:#dfe8ff;--mute:#9aa7d0;--cyan:#4de8ff;--pink:#ff3ea5;--pink-ink:#ff8cc8;--line:#2b3a66;--well:#05050f;--hover-ink:#12040d;--glow:rgba(77,232,255,.35);--scan:rgba(0,0,0,.22)}
 @media (prefers-color-scheme:light){:root{--bg:#f3f0ff;--sky:linear-gradient(#e4e0ff 40%,#ffd3ec 85%,#ffb3d9);--card:rgba(255,255,255,.94);--ink:#1a1740;--mute:#4a5280;--cyan:#006a85;--pink:#b3126b;--pink-ink:#a10f5f;--line:#8a98d0;--well:#eef2ff;--hover-ink:#fff;--glow:rgba(0,106,133,.25);--scan:rgba(0,0,0,.04)}}
@@ -34,55 +34,19 @@ footer{margin-top:1rem;color:var(--mute);font-size:.8rem;text-align:center}
 <body>
 <canvas id="sky" aria-hidden="true"></canvas>
 <main>
-<span class="tag">SYS_INIT // BOOTING</span>
-<h1>Service not ready</h1>
-<div class="sub"><span lang="ja">準備中</span> // booting</div>
-<p>The container is starting. This page checks again every 30 seconds and loads the service as soon as it answers.</p>
+<span class="tag">{{tag}}</span>
+<h1>{{heading}}</h1>
+<div class="sub"><span lang="ja">{{ja}}</span> // {{en}}</div>
+<p>{{text}}</p>
 <!-- The countdown ticks every second, so it is hidden from assistive tech and the
      polite live region only hears about state changes. -->
-<div id="status" role="status" aria-live="polite"><i aria-hidden="true"></i><span id="msg" aria-hidden="true">checking again in 30s</span><span id="announce" class="sr">Checking again every 30 seconds.</span></div>
-<button type="button" id="retry">RETRY NOW</button>
-<footer>ERR 503 // temporarily unavailable</footer>
+<div id="status" role="status" aria-live="polite"><i aria-hidden="true"></i><span id="msg" aria-hidden="true">{{msg}}</span><span id="announce" class="sr">{{announce}}</span></div>
+<button type="button" id="retry">{{button}}</button>
+<footer>{{footer}}</footer>
 </main>
 <script>
 {
-  // Seconds between checks. The server's Retry-After header replaces it after the first poll.
-  let wait = 30;
-  let left = wait;
-  let busy = false;
-  const msg = document.getElementById("msg");
-  const announce = document.getElementById("announce");
-  const btn = document.getElementById("retry");
-  const say = (visible, spoken) => {
-    msg.textContent = visible;
-    announce.textContent = spoken;
-  };
-  const done = () => {
-    busy = false;
-    btn.disabled = false;
-    left = wait;
-    say(`still starting. checking again in ${wait}s`, `Still starting. Checking again in ${wait} seconds.`);
-  };
-  const check = () => {
-    if (busy) return;
-    busy = true;
-    btn.disabled = true;
-    say("checking now...", "Checking now.");
-    fetch(location.href, { cache: "no-store", credentials: "same-origin" })
-      .then((r) => {
-        if (r.status !== 503) return location.reload();
-        wait = Number(r.headers.get("Retry-After")) || wait;
-        done();
-      })
-      .catch(done);
-  };
-  btn.addEventListener("click", check);
-  setInterval(() => {
-    if (busy) return;
-    left -= 1;
-    if (left <= 0) check();
-    else msg.textContent = `checking again in ${left}s`;
-  }, 1000);
+  /*BEHAVIOR*/
 
   // Pixel skyline: drawn at low resolution, scaled up with hard edges. Decoration only.
   const c = document.getElementById("sky");
