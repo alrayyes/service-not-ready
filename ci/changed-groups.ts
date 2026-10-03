@@ -5,6 +5,13 @@
 const groups = {
 	lint: [/\.(ts|json)$/, /^bun\.lock$/, /^\.editorconfig$/],
 	dockerfile: [/^Dockerfile$/, /^\.dockerignore$/, /^\.hadolint\.yaml$/],
+	// The docs Vale reads (scripts/lint-prose.sh), its config and its vocabulary.
+	prose: [
+		/^(README|CONTRIBUTING|SECURITY)\.md$/,
+		/^\.vale\.ini$/,
+		/^styles\//,
+		/^scripts\/lint-prose\.sh$/,
+	],
 	test: [
 		/^(Dockerfile|Caddyfile|503\.html|\.dockerignore)$/,
 		/^test\//,
