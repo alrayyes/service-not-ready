@@ -32,6 +32,10 @@ The tests in `test/` start the image with the same flags the README documents (r
 
 `503.html` must stay one file with no external requests. A test fails on any request that leaves the origin. It also runs an axe-core scan in dark and light, with and without reduced motion.
 
+## The README screenshot
+
+`bun run screenshot [file]` shoots the page from the image (`IMAGE`, default `service-not-ready:test`) at a fixed size, dark scheme and reduced motion. The release job runs it against the image it just published and attaches `screenshot.png` to the release. The README embeds `releases/latest/download/screenshot.png`, so it updates on release with no commit. Change `test/screenshot.ts` if the shot should look different.
+
 ## CI path filtering
 
 On a pull request, `lint`, `dockerfile` and `test` run only when files they cover change, so a README edit builds nothing. `ci/changed-groups.ts` holds the file lists (`bun test ./ci` covers them), and editing `ci.yml` runs all three. The secret scan, audit and commit lint always run, and a push to `main` runs everything. Add a file a job reads to its list, or the job skips a change that could break it.

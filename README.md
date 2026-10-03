@@ -6,6 +6,8 @@ It's one Caddy container with the page baked in. No bind mounts, no external req
 
 Image: `ghcr.io/alrayyes/service-not-ready`
 
+![The service not ready page: a neon cityscape behind a card reading "Service not ready", a checking-again countdown and a Retry now button.](https://github.com/alrayyes/service-not-ready/releases/latest/download/screenshot.png)
+
 ## Requirements
 
 - Docker (or any OCI runtime) to run the image.
