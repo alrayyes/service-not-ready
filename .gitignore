@@ -1,0 +1,6 @@
+node_modules/
+test-results/
+playwright-report/
+
+# Written by the release job, not by hand.
+CHANGELOG.md
