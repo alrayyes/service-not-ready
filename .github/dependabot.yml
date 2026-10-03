@@ -1,0 +1,19 @@
+# Dependabot on GitHub, not Renovate: Renovate only runs where it can push, and a
+# GitHub-primary repo is invisible to it however it is mirrored.
+version: 2
+updates:
+  - package-ecosystem: "bun"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+
+  # Moves the caddy:2-alpine digest pin in the Dockerfile.
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
