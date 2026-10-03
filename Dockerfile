@@ -1,7 +1,7 @@
 FROM caddy:2-alpine@sha256:881bbc60f9986d5ab8e7cfd6cf7e4ef3c9c0439fef2429d035d065577882f028
 
 COPY Caddyfile /etc/caddy/Caddyfile
-COPY 503.html /srv/503.html
+COPY pages/ /srv/
 
 # Caddy keeps its lock and instance files here even with nothing to manage, so they have to
 # belong to the user that ends up running it. With a read-only root, mount a tmpfs over each

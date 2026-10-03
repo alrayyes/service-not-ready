@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<meta name="color-scheme" content="dark light">
+<title>Something went wrong</title>
+<style>
+:root{--bg:#0a0818;--sky:linear-gradient(#0a0818 40%,#3b0f4d 85%,#7a1b66);--card:rgba(9,8,24,.92);--ink:#dfe8ff;--mute:#9aa7d0;--cyan:#4de8ff;--pink:#ff3ea5;--pink-ink:#ff8cc8;--line:#2b3a66;--well:#05050f;--hover-ink:#12040d;--glow:rgba(77,232,255,.35);--scan:rgba(0,0,0,.22)}
+@media (prefers-color-scheme:light){:root{--bg:#f3f0ff;--sky:linear-gradient(#e4e0ff 40%,#ffd3ec 85%,#ffb3d9);--card:rgba(255,255,255,.94);--ink:#1a1740;--mute:#4a5280;--cyan:#006a85;--pink:#b3126b;--pink-ink:#a10f5f;--line:#8a98d0;--well:#eef2ff;--hover-ink:#fff;--glow:rgba(0,106,133,.25);--scan:rgba(0,0,0,.04)}}
+*{box-sizing:border-box;margin:0}
+html{background:var(--sky)}
+body{min-height:100vh;display:grid;place-items:center;padding:1.5rem;color:var(--ink);font:16px/1.55 ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace}
+#sky{position:fixed;inset:0;width:100%;height:100%;z-index:-1;image-rendering:pixelated}
+main{width:100%;max-width:30rem;padding:1.75rem 1.5rem;background:var(--card);border:1px solid var(--cyan);box-shadow:0 0 0 1px var(--bg),0 0 22px var(--glow);position:relative}
+main::after{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(transparent 0 2px,var(--scan) 2px 3px)}
+.tag{display:inline-block;padding:.1rem .5rem;border:1px solid var(--cyan);color:var(--cyan);font-size:.75rem;letter-spacing:.08em}
+h1{margin:.9rem 0 .15rem;font-size:1.6rem;letter-spacing:.06em;text-transform:uppercase;text-shadow:2px 0 var(--pink),-2px 0 var(--cyan)}
+.sub{color:var(--pink-ink);font-size:.95rem}
+p{margin:1rem 0;color:var(--ink)}
+#status{display:flex;gap:.5rem;align-items:center;padding:.6rem .75rem;border:1px solid var(--line);background:var(--well);color:var(--cyan);font-size:.9rem}
+#status i{flex:none;width:.55rem;height:1rem;background:var(--cyan);animation:blink 1s steps(2) infinite}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+button{display:block;width:100%;margin-top:1rem;padding:.7rem;font:inherit;font-weight:700;letter-spacing:.12em;color:var(--pink-ink);background:transparent;border:2px solid var(--pink);cursor:pointer}
+button:hover{background:var(--pink);color:var(--hover-ink)}
+button:focus-visible{outline:3px solid var(--cyan);outline-offset:3px}
+button:disabled{opacity:.7;cursor:progress}
+footer{margin-top:1rem;color:var(--mute);font-size:.8rem;text-align:center}
+@keyframes blink{50%{opacity:0}}
+@media (prefers-reduced-motion:reduce){#status i{animation:none}}
+</style>
+</head>
+<body>
+<canvas id="sky" aria-hidden="true"></canvas>
+<main>
+<span class="tag">FAULT // UNKNOWN</span>
+<h1>Something went wrong</h1>
+<div class="sub"><span lang="ja">異常</span> // error</div>
+<p>The request couldn't be completed. Try again in a bit.</p>
+<!-- The countdown ticks every second, so it is hidden from assistive tech and the
+     polite live region only hears about state changes. -->
+<div id="status" role="status" aria-live="polite"><i aria-hidden="true"></i><span id="msg" aria-hidden="true">something went wrong</span><span id="announce" class="sr">something went wrong</span></div>
+<button type="button" id="retry">TRY AGAIN</button>
+<footer>ERR // unexpected error</footer>
+</main>
+<script>
+{
+  document.getElementById("retry").addEventListener("click", () => location.reload());
+
+
+  // Pixel skyline: drawn at low resolution, scaled up with hard edges. Decoration only.
+  const c = document.getElementById("sky");
+  const g = c.getContext("2d");
+  const W = 160;
+  const H = 90;
+  c.width = W;
+  c.height = H;
+  const palettes = {
+    dark: {
+      sky: ["#0a0818", "#2a0f45", "#7a1b66"],
+      layers: ["#0f0b26", "#0b081d", "#070514"],
+      neon: ["#4de8ff", "#ff3ea5", "#a45cff", "#ffd24d"],
+      rain: "rgba(160,200,255,.45)",
+    },
+    light: {
+      sky: ["#cfd8ff", "#ffd0ea", "#ffb0d6"],
+      layers: ["#9a94cf", "#7c76b8", "#5f5997"],
+      neon: ["#ffffff", "#ffe9a8", "#bff3ff", "#ffc2e2"],
+      rain: "rgba(70,80,150,.4)",
+    },
+  };
+  const scheme = matchMedia("(prefers-color-scheme: light)");
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)");
+  const bg = document.createElement("canvas");
+  bg.width = W;
+  bg.height = H;
+  const b = bg.getContext("2d");
+  let seed = 7;
+  const rnd = () => {
+    seed = (seed * 16807) % 2147483647;
+    return seed / 2147483647;
+  };
+  let p = palettes.dark;
+  let drops = [];
+  const paint = () => {
+    p = scheme.matches ? palettes.light : palettes.dark;
+    seed = 7;
+    const sky = b.createLinearGradient(0, 0, 0, H);
+    sky.addColorStop(0, p.sky[0]);
+    sky.addColorStop(0.6, p.sky[1]);
+    sky.addColorStop(1, p.sky[2]);
+    b.fillStyle = sky;
+    b.fillRect(0, 0, W, H);
+    for (let layer = 0; layer < 3; layer++) {
+      const base = H - layer * 4;
+      let x = 0;
+      while (x < W) {
+        const w = 6 + Math.floor(rnd() * 12);
+        const h = 18 + Math.floor(rnd() * (40 - layer * 6)) + (2 - layer) * 4;
+        b.fillStyle = p.layers[layer];
+        b.fillRect(x, base - h, w, h);
+        if (layer === 2) {
+          for (let y = base - h + 3; y < base - 2; y += 3) {
+            for (let xx = x + 1; xx < x + w - 1; xx += 3) {
+              if (rnd() < 0.35) {
+                b.fillStyle = p.neon[Math.floor(rnd() * 4)];
+                b.fillRect(xx, y, 1, 1);
+              }
+            }
+          }
+        }
+        x += w + (rnd() < 0.3 ? 1 : 0);
+      }
+    }
+    drops = Array.from({ length: 40 }, () => [Math.floor(rnd() * W), Math.floor(rnd() * H)]);
+    frame();
+  };
+  const frame = () => {
+    g.drawImage(bg, 0, 0);
+    g.fillStyle = p.rain;
+    for (const d of drops) {
+      g.fillRect(d[0], d[1], 1, 3);
+      d[1] = (d[1] + 3) % H;
+    }
+  };
+  paint();
+  scheme.addEventListener("change", paint);
+  if (!reduce.matches) setInterval(frame, 100);
+}
+</script>
+</body>
+</html>

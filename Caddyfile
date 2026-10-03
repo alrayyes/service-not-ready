@@ -4,27 +4,41 @@
 	admin off
 }
 
+# A fallback must never be cached, or the page outlives the outage it reports. The page is
+# one file with inline style and script and talks only to itself.
+(headers) {
+	header {
+		Cache-Control "no-store"
+		X-Content-Type-Options nosniff
+		Referrer-Policy strict-origin-when-cross-origin
+		Content-Security-Policy "default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'self'; img-src data:; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
+		-Server
+	}
+}
+
 :{$LISTEN_PORT:8080} {
 	root * /srv
 
-	# Every path, every method and every Host is "not ready". `error` hands the request to
+	# Traefik's errors middleware asks for /<status>.html and returns the body with the
+	# original status, so these answer 200. Only these exact names.
+	@page path_regexp ^/(401|403|404|429|500|502|503|504|error)\.html$
+	handle @page {
+		encode zstd gzip
+		file_server
+		import headers
+	}
+
+	# Everything else is "not ready": every path, method and Host. `error` hands the request to
 	# handle_errors, which is the only place that can serve a file with a non-200 status.
-	error "service not ready" 503
+	handle {
+		error "service not ready" 503
+	}
 
 	handle_errors {
 		rewrite * /503.html
 		encode zstd gzip
 		file_server
-
-		header {
-			# A fallback must never be cached, or the page outlives the outage it reports.
-			Cache-Control "no-store"
-			Retry-After "{$RETRY_AFTER:30}"
-			X-Content-Type-Options nosniff
-			Referrer-Policy strict-origin-when-cross-origin
-			# The page is one file with inline style and script and talks only to itself.
-			Content-Security-Policy "default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'self'; img-src data:; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
-			-Server
-		}
+		import headers
+		header Retry-After "{$RETRY_AFTER:30}"
 	}
 }
