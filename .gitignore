@@ -1,7 +1,8 @@
 node_modules/
 test-results/
 playwright-report/
-screenshot.png
+screenshot*.png
+screenshots/
 
 # Downloaded by `vale sync`.
 styles/Google/
