@@ -1,0 +1,6 @@
+# Coverage is information here, not a merge gate: no status checks, no PR comment.
+coverage:
+  status:
+    project: off
+    patch: off
+comment: false

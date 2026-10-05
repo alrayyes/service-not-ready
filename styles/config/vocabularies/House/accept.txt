@@ -24,3 +24,5 @@ busybox
 OCI
 lockfile
 middleware
+Codecov
+lcov

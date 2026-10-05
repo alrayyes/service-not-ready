@@ -7,3 +7,5 @@ screenshots/
 # Downloaded by `vale sync`.
 styles/Google/
 styles/proselint/
+coverage/
+coverage.txt

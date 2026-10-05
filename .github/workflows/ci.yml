@@ -77,7 +77,7 @@ jobs:
       - name: Test with coverage
         run: |
           status=0
-          bun test --coverage ./ci > coverage.txt 2>&1 || status=$?
+          bun test --coverage --coverage-reporter=text --coverage-reporter=lcov ./ci > coverage.txt 2>&1 || status=$?
           cat coverage.txt
           {
             echo '### Unit-test coverage (`bun test --coverage ./ci`)'
@@ -86,6 +86,14 @@ jobs:
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
           exit "$status"
+      # Dependabot's runs don't get repository secrets, so an upload there would fail the job
+      # on every bump.
+      - uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
+        if: github.actor != 'dependabot[bot]'
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: coverage/lcov.info
+          fail_ci_if_error: true
 
   # Style is advice, so Vale only fails the job on its error-level rules (a product name
   # spelled wrong); warnings print. Official image, run through the same script as a local run.

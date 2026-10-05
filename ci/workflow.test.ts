@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 interface Step {
 	uses?: string;
 	run?: string;
-	with?: Record<string, string | number>;
+	with?: Record<string, string | number | boolean>;
 }
 
 const workflow = Bun.YAML.parse(
@@ -38,4 +38,25 @@ test("the lint job reports unit-test coverage in the job summary", () => {
 	const coverage = runs.find((r) => r.includes("bun test --coverage ./ci"));
 	expect(coverage, "no coverage step").toBeDefined();
 	expect(coverage).toContain("$GITHUB_STEP_SUMMARY");
+});
+
+test("the lint job uploads the lcov report to Codecov, and a failed upload fails the job", () => {
+	const lint = workflow.jobs.lint;
+	const steps = lint?.steps ?? [];
+	const tests = steps.find((s) => s.run?.includes("bun test --coverage"));
+	expect(tests?.run).toContain("--coverage-reporter=lcov");
+	const upload = steps.find((s) => s.uses?.startsWith("codecov/codecov-action@"));
+	expect(upload?.uses).toMatch(/^codecov\/codecov-action@[0-9a-f]{40}$/);
+	expect(upload?.with?.token).toBe(`\${{ secrets.CODECOV_TOKEN }}`);
+	expect(upload?.with?.fail_ci_if_error).toBe(true);
+	expect(upload?.with?.files).toBe("coverage/lcov.info");
+});
+
+test("Codecov adds no status checks and no PR comment", () => {
+	const codecov = Bun.YAML.parse(
+		readFileSync(new URL("../codecov.yml", import.meta.url), "utf8"),
+	) as { coverage: { status: Record<string, unknown> }; comment: unknown };
+	expect(codecov.coverage.status.project).toBe("off");
+	expect(codecov.coverage.status.patch).toBe("off");
+	expect(codecov.comment).toBe(false);
 });

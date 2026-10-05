@@ -40,7 +40,7 @@ Each page must stay one file with no external requests. A test fails on any requ
 
 ## Coverage
 
-The `lint` job runs `bun test --coverage ./ci` and writes the table to the job summary, so a drop is visible. It's a number to look at, not a target. Only the unit tests in `ci/` are measured. The Playwright tests are not measured: they drive a running container, so there are no lines of the code here for a tool to count.
+The `lint` job runs `bun test --coverage ./ci` and writes the table to the job summary, so a drop is visible, and uploads the lcov report to [Codecov](https://codecov.io/gh/alrayyes/service-not-ready) with the `CODECOV_TOKEN` repository secret. A failed upload fails the job, except on Dependabot's runs, which get no secrets. `codecov.yml` turns off its status checks and PR comment, so coverage never gates a merge. It's a number to look at, not a target. Only the unit tests in `ci/` are measured. The Playwright tests are not measured: they drive a running container, so there are no lines of the code here for a tool to count.
 
 ## Prose style
 
