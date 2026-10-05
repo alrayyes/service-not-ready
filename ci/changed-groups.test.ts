@@ -31,6 +31,7 @@ test.each([
 	["codecov.yml", { lint: true }],
 	// bun test ./ci reads its badges.
 	["README.md", { lint: true, prose: true }],
+	["lefthook.yml", { lint: true }],
 ])("%s runs only the checks it covers", (file, expected) => {
 	expect(changedGroups([file])).toEqual({ ...none, ...expected });
 });
