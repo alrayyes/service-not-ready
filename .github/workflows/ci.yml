@@ -239,7 +239,18 @@ jobs:
   # release through the API. RELEASE_TOKEN, not GITHUB_TOKEN: a pull request authored by
   # GITHUB_TOKEN sits at action_required with no checks run.
   release:
-    needs: [secrets, lint, prose, markdown-format, markdown-structure, markdown-grammar, audit, dockerfile, test]
+    needs:
+      [
+        secrets,
+        lint,
+        prose,
+        markdown-format,
+        markdown-structure,
+        markdown-grammar,
+        audit,
+        dockerfile,
+        test,
+      ]
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
     timeout-minutes: 10
