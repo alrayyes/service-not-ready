@@ -28,6 +28,7 @@ test.each([
 	["styles/config/vocabularies/House/accept.txt", { prose: true }],
 	["scripts/lint-prose.sh", { prose: true }],
 	["ci/changed-groups.ts", { lint: true }],
+	["codecov.yml", { lint: true }],
 	// bun test ./ci reads its badges.
 	["README.md", { lint: true, prose: true }],
 ])("%s runs only the checks it covers", (file, expected) => {

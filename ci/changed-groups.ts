@@ -4,8 +4,15 @@
 
 const groups = {
 	// pages/ and src/ are in lint because the drift test (bun test ./ci) compares them, and
-	// README.md because that suite checks its badges.
-	lint: [/\.(ts|json)$/, /^bun\.lock$/, /^\.editorconfig$/, /^README\.md$/, /^(pages|src)\//],
+	// README.md and codecov.yml because that suite checks them.
+	lint: [
+		/\.(ts|json)$/,
+		/^bun\.lock$/,
+		/^\.editorconfig$/,
+		/^README\.md$/,
+		/^codecov\.yml$/,
+		/^(pages|src)\//,
+	],
 	dockerfile: [/^Dockerfile$/, /^\.dockerignore$/, /^\.hadolint\.yaml$/],
 	// The docs Vale reads (scripts/lint-prose.sh), its config and its vocabulary.
 	prose: [
