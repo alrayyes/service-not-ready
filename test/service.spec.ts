@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { expect, test } from "@playwright/test";
 import { exec, inspect, logs, type Running, ready, start, stop } from "./container";
 
@@ -66,6 +67,15 @@ test.describe("hardening", () => {
 	test("has a read-only root filesystem", () => {
 		expect(inspect(c.name, "{{.HostConfig.ReadonlyRootfs}}")).toBe("true");
 		expect(() => exec(c.name, "touch", "/etc/should-not-work")).toThrow();
+	});
+
+	test("runs with the memory and CPU limits the README documents", () => {
+		expect(inspect(c.name, "{{.HostConfig.Memory}}")).toBe("67108864");
+		expect(inspect(c.name, "{{.HostConfig.NanoCpus}}")).toBe("500000000");
+		const readme = readFileSync("README.md", "utf8");
+		for (const setting of ["--memory 64m", "--cpus 0.5", "mem_limit: 64m", "cpus: 0.5"]) {
+			expect(readme, setting).toContain(setting);
+		}
 	});
 
 	test("starts without filesystem or permission errors", () => {

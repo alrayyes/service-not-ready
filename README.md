@@ -26,6 +26,7 @@ docker run -d --name service-not-ready \
   --tmpfs /data:mode=1777 \
   --cap-drop=ALL --cap-add=NET_BIND_SERVICE \
   --security-opt=no-new-privileges:true \
+  --memory 64m --cpus 0.5 \
   -p 8080:8080 \
   ghcr.io/alrayyes/service-not-ready:latest
 
@@ -48,6 +49,8 @@ services:
     cap_add: [NET_BIND_SERVICE]
     security_opt:
       - no-new-privileges:true
+    mem_limit: 64m
+    cpus: 0.5
     restart: always
     # The image has a HEALTHCHECK already. Put the proxy's own settings (labels, networks)
     # here. Tell it to send traffic to port 8080: the base image exposes 80, 443 and 2019
@@ -58,6 +61,7 @@ Why each setting is there:
 
 - **`read_only` and the two tmpfs mounts.** Caddy writes its autosaved config to `/config` and its state to `/data` even with nothing to manage. Docker's default tmpfs isn't writable by `nobody`, so each needs `mode=1777`. Without the mode you get "permission denied" errors in the log, though the page still serves.
 - **`cap_add: NET_BIND_SERVICE`.** The image only binds port 8080, but `/usr/bin/caddy` carries the `cap_net_bind_service` file capability. With `no-new-privileges` and everything else dropped, the kernel refuses to exec it (`operation not permitted`) and the container restart-loops. Verified against `caddy:2-alpine` 2.11.6.
+- **`--memory 64m` and `--cpus 0.5`.** An unbounded container can starve the host if something goes wrong in it, and a fallback shouldn't be able to take down the machine it's covering for. Caddy serving these pages sits well under both. Raise them if you put a lot of traffic on it.
 - **Runs as `nobody:nobody`.** That's baked in. Nothing to set.
 
 ## Configuration
