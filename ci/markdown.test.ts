@@ -56,3 +56,8 @@ test("a skipped heading level fails markdownlint", () => {
 	const file = fixture("heading.md", "# T\n\n### Skipped\n");
 	expect(markdownlint(file).code).not.toBe(0);
 });
+
+test("an unformatted YAML file fails prettier --check", () => {
+	const file = fixture("bad.yml", "a:   1\nlist:\n    - x\n");
+	expect(prettier(file).code).not.toBe(0);
+});

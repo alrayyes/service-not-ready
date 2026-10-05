@@ -1,7 +1,14 @@
 import { expect, test } from "bun:test";
 import { changedGroups } from "./changed-groups";
 
-const none = { lint: false, dockerfile: false, test: false, prose: false, markdown: false };
+const none = {
+	lint: false,
+	dockerfile: false,
+	test: false,
+	prose: false,
+	markdown: false,
+	yaml: false,
+};
 
 test("a docs-only change runs only the prose check", () => {
 	expect(changedGroups(["CONTRIBUTING.md", "SECURITY.md"])).toEqual({
@@ -17,7 +24,7 @@ test("the generated changelog runs nothing", () => {
 
 test.each([
 	["Dockerfile", { dockerfile: true, test: true }],
-	[".hadolint.yaml", { dockerfile: true }],
+	[".hadolint.yaml", { dockerfile: true, yaml: true }],
 	[".dockerignore", { dockerfile: true, test: true }],
 	["Caddyfile", { test: true }],
 	["pages/404.html", { lint: true, test: true }],
@@ -32,13 +39,14 @@ test.each([
 	["styles/config/vocabularies/House/accept.txt", { prose: true }],
 	["scripts/lint-prose.sh", { prose: true }],
 	["ci/changed-groups.ts", { lint: true }],
-	["codecov.yml", { lint: true }],
+	["codecov.yml", { lint: true, yaml: true }],
 	// bun test ./ci reads its badges.
+	[".github/dependabot.yml", { yaml: true }],
 	["README.md", { lint: true, prose: true, markdown: true }],
-	["lefthook.yml", { lint: true }],
-	[".prettierrc", { markdown: true }],
-	[".prettierignore", { markdown: true }],
-	[".markdownlint-cli2.yaml", { markdown: true }],
+	["lefthook.yml", { lint: true, yaml: true }],
+	[".prettierrc", { markdown: true, yaml: true }],
+	[".prettierignore", { markdown: true, yaml: true }],
+	[".markdownlint-cli2.yaml", { markdown: true, yaml: true }],
 	[".ltex.json", { lint: true, markdown: true }],
 	["scripts/lint-grammar.sh", { markdown: true }],
 ])("%s runs only the checks it covers", (file, expected) => {
@@ -52,6 +60,7 @@ test("editing the workflow runs every job", () => {
 		test: true,
 		prose: true,
 		markdown: true,
+		yaml: true,
 	});
 });
 

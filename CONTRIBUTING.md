@@ -54,6 +54,8 @@ Three checks run as separate CI jobs, so a red run says which. They run in `left
 - **Structure: markdownlint-cli2** (`bun run lint:md:structure`), on top of its bundled Prettier style. `line-length` is re-enabled under its alias, not `MD013`, with a generous limit because paragraphs are one line each. A test (`ci/markdown.test.ts`) proves the limit still fails on a long line.
 - **Grammar: LTeX** (`bun run lint:md:grammar`) from the `ghcr.io/alrayyes/ltex-cli-plus` image, so it needs Docker. It exits 3 on a finding, and the CI job runs a canary (`an university`) to prove that. A term LTeX doesn't know goes in `.ltex.json`'s dictionary, and the same term goes in Vale's `accept.txt`: neither reads the other. Passive voice is off here because Vale covers it, and so is the capital-letter rule, which fires on the repository name in the title.
 
+Prettier formats YAML the same way (`bun run lint:yaml:format`, `bun run format:yaml` to fix), in its own `yaml-format` job that runs when a YAML file changes.
+
 The three read every Markdown file except `CHANGELOG.md` (generated) and the tool-installed `.claude/` and `openspec/`. They run only when Markdown or their config files change.
 
 ## Prose style
