@@ -1,5 +1,9 @@
 # service-not-ready
 
+[![CI](https://github.com/alrayyes/service-not-ready/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/alrayyes/service-not-ready/actions/workflows/ci.yml)
+[![Latest release](https://img.shields.io/github/v/release/alrayyes/service-not-ready)](https://github.com/alrayyes/service-not-ready/releases/latest)
+[![Licence: GPL-3.0-only](https://img.shields.io/github/license/alrayyes/service-not-ready)](LICENSE)
+
 Error pages for when the thing behind your reverse proxy isn't answering. By default it answers every request with a `503`, tells clients to retry in 30 seconds, and shows a page that checks again on its own and loads the real service the moment it stops answering 503. It also carries a page in the same look for each error a proxy can produce (401, 403, 404, 429, 500, 502, 504 and a generic one), for a proxy's error middleware to ask for by status.
 
 It's one Caddy container with the pages baked in. No bind mounts, no external requests, no JavaScript or CSS from anywhere else: each page is a single file.
