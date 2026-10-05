@@ -1,6 +1,7 @@
 # service-not-ready
 
 [![CI](https://github.com/alrayyes/service-not-ready/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/alrayyes/service-not-ready/actions/workflows/ci.yml)
+[![Codecov](https://codecov.io/gh/alrayyes/service-not-ready/graph/badge.svg)](https://codecov.io/gh/alrayyes/service-not-ready)
 [![Latest release](https://img.shields.io/github/v/release/alrayyes/service-not-ready)](https://github.com/alrayyes/service-not-ready/releases/latest)
 [![Licence: GPL-3.0-only](https://img.shields.io/github/license/alrayyes/service-not-ready)](LICENSE)
 
