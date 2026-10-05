@@ -4,7 +4,7 @@ import { changedGroups } from "./changed-groups";
 const none = { lint: false, dockerfile: false, test: false, prose: false };
 
 test("a docs-only change runs only the prose check", () => {
-	expect(changedGroups(["README.md", "SECURITY.md"])).toEqual({ ...none, prose: true });
+	expect(changedGroups(["CONTRIBUTING.md", "SECURITY.md"])).toEqual({ ...none, prose: true });
 });
 
 test("the generated changelog runs nothing", () => {
@@ -28,6 +28,8 @@ test.each([
 	["styles/config/vocabularies/House/accept.txt", { prose: true }],
 	["scripts/lint-prose.sh", { prose: true }],
 	["ci/changed-groups.ts", { lint: true }],
+	// bun test ./ci reads its badges.
+	["README.md", { lint: true, prose: true }],
 ])("%s runs only the checks it covers", (file, expected) => {
 	expect(changedGroups([file])).toEqual({ ...none, ...expected });
 });
@@ -42,5 +44,9 @@ test("editing the workflow runs every job", () => {
 });
 
 test("a mixed change runs the union", () => {
-	expect(changedGroups(["README.md", "Caddyfile"])).toEqual({ ...none, test: true, prose: true });
+	expect(changedGroups(["CONTRIBUTING.md", "Caddyfile"])).toEqual({
+		...none,
+		test: true,
+		prose: true,
+	});
 });
