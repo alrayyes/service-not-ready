@@ -60,3 +60,9 @@ test("Codecov adds no status checks and no PR comment", () => {
 	expect(codecov.coverage.status.patch).toBe("off");
 	expect(codecov.comment).toBe(false);
 });
+
+// An advisory with no patched version is the one justified ignore, ticketed (#46) and exact.
+test("the audit job ignores only GHSA-vfj7-8cjw-p6xm", () => {
+	const run = (workflow.jobs.audit?.steps ?? []).map((s) => s.run ?? "").join("\n");
+	expect([...run.matchAll(/--ignore[= ](\S+)/g)].map((m) => m[1])).toEqual(["GHSA-vfj7-8cjw-p6xm"]);
+});
