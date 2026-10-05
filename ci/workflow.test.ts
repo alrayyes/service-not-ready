@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 
 interface Step {
 	uses?: string;
+	run?: string;
 	with?: Record<string, string | number>;
 }
 
@@ -29,4 +30,12 @@ test.each(WRAPPED)("%s only runs inside a SHA-pinned wretry.action, 3 attempts",
 	expect(step.uses).toMatch(/^Wandalen\/wretry\.action@[0-9a-f]{40}$/);
 	expect(String(step.with?.action)).toMatch(/@[0-9a-f]{40}$/);
 	expect(step.with?.attempt_limit).toBe(3);
+});
+
+test("the lint job reports unit-test coverage in the job summary", () => {
+	const lint = workflow.jobs.lint;
+	const runs = (lint?.steps ?? []).map((s) => s.run ?? "");
+	const coverage = runs.find((r) => r.includes("bun test --coverage ./ci"));
+	expect(coverage, "no coverage step").toBeDefined();
+	expect(coverage).toContain("$GITHUB_STEP_SUMMARY");
 });
