@@ -83,3 +83,10 @@ test("the grammar job proves LTeX fails on a real error", () => {
 	const steps = (workflow.jobs["markdown-grammar"]?.steps ?? []).map((s) => s.run ?? "");
 	expect(steps.some((r) => r.includes("an university"))).toBe(true);
 });
+
+test("yaml-format is its own job, gated on the yaml path group", () => {
+	const job = workflow.jobs["yaml-format"] as unknown as { if?: string; needs?: string };
+	expect(job).toBeDefined();
+	expect(job.needs).toBe("changes");
+	expect(job.if).toContain("needs.changes.outputs.yaml");
+});

@@ -30,6 +30,8 @@ const groups = {
 		/^scripts\/lint-grammar\.sh$/,
 		/^(package\.json|bun\.lock)$/,
 	],
+	// Every YAML file Prettier checks, and its config.
+	yaml: [/\.ya?ml$/, /^\.(prettierrc|prettierignore)$/],
 	test: [
 		/^(Dockerfile|Caddyfile|\.dockerignore)$/,
 		/^(pages|src)\//,

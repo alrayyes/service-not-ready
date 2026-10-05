@@ -13,9 +13,9 @@ pre-commit:
       glob: package.json
       run: bunx sort-package-json
       stage_fixed: true
-    # Prettier first: it decides the layout markdownlint then judges.
+    # Prettier first: it decides the layout markdownlint then judges. Markdown and YAML are its remit.
     - name: prettier
-      glob: "*.md"
+      glob: "*.{md,yml,yaml}"
       run: bunx prettier --write {staged_files}
       stage_fixed: true
 
@@ -30,6 +30,9 @@ pre-push:
       run: bunx biome check .
     - name: sort-package-json
       run: bunx sort-package-json --check
+    - name: yaml format
+      glob: "*.{yml,yaml}"
+      run: bun run lint:yaml:format
     - name: markdown format
       glob: "*.md"
       run: bun run lint:md:format
@@ -56,5 +59,17 @@ pre-push:
       run: docker build --quiet --tag service-not-ready:test .
     # Builds the image itself, so it is the slow one: about 15 seconds.
     - name: image tests
-      glob: ["Dockerfile", "Caddyfile", ".dockerignore", "pages/*", "src/*", "test/*", "scripts/build-pages.ts", "playwright.config.ts", "package.json", "bun.lock"]
+      glob:
+        [
+          "Dockerfile",
+          "Caddyfile",
+          ".dockerignore",
+          "pages/*",
+          "src/*",
+          "test/*",
+          "scripts/build-pages.ts",
+          "playwright.config.ts",
+          "package.json",
+          "bun.lock",
+        ]
       run: bunx playwright test

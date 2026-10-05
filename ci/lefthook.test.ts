@@ -33,12 +33,17 @@ test("pre-commit lets prettier fix and restage Markdown", () => {
 	const prettier = hook("pre-commit").find((j) => j.run?.includes("prettier"));
 	expect(prettier?.run).toContain("--write");
 	expect(prettier?.stage_fixed).toBe(true);
-	expect(prettier?.glob).toBe("*.md");
+	expect(prettier?.glob).toBe("*.{md,yml,yaml}");
 });
 
 test("pre-push checks the three Markdown tiers without writing", () => {
 	const all = runs("pre-push").join("\n");
-	for (const expected of ["lint:md:format", "lint:md:structure", "lint:md:grammar"]) {
+	for (const expected of [
+		"lint:md:format",
+		"lint:md:structure",
+		"lint:md:grammar",
+		"lint:yaml:format",
+	]) {
 		expect(all, expected).toContain(expected);
 	}
 });
