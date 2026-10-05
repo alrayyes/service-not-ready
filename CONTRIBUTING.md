@@ -4,7 +4,7 @@ The [README](README.md) is for whoever runs the image. This file is for whoever 
 
 ## Getting set up
 
-- [bun](https://bun.sh) 1.4 or newer, for the test tooling.
+- [bun](https://bun.sh) 1.3.14, for the test tooling. `package.json`, CI and the lockfile pin it, and it stays below 1.4 until Dependabot can read the newer lockfile format (`rules/javascript.md`; `bun test ./ci` checks they agree).
 - Docker, running. The tests build the image and start containers.
 
 ```sh
