@@ -26,3 +26,4 @@ lockfile
 middleware
 Codecov
 lcov
+lefthook

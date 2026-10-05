@@ -24,7 +24,7 @@ docker run --rm -i hadolint/hadolint < Dockerfile
 
 ## Git hooks
 
-`bun install` installs [lefthook](https://lefthook.dev) hooks that run what CI runs. On commit, biome and `sort-package-json` fix the staged files and restage them, and commitlint checks the message. On push, nothing is written: biome, `sort-package-json`, the type-check, `bun test ./ci`, hadolint, the image build and the image tests run in check mode over the whole tree, about 20 seconds. They print nothing when they pass. `LEFTHOOK=0 git push` skips them for one command; CI sets it for every job. A change to `lefthook.yml` is covered by `bun test ./ci`.
+`bun install` installs [lefthook](https://lefthook.dev) hooks that run what CI runs. On commit, Biome and `sort-package-json` fix the staged files and restage them, and commitlint checks the message. On push, nothing is written: Biome, `sort-package-json`, the type-check, `bun test ./ci`, hadolint, the image build and the image tests run in check mode over the whole tree, about 20 seconds. They print nothing when they pass. `LEFTHOOK=0 git push` skips them for one command; CI sets it for every job. A change to `lefthook.yml` is covered by `bun test ./ci`.
 
 `bun run test` builds `service-not-ready:test` from the working tree. Set `IMAGE=<ref>` to test an image you already built or pulled instead.
 
