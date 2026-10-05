@@ -3,8 +3,9 @@
 // Each group lists the files its job reads, its tool config and the workflow itself.
 
 const groups = {
-	// pages/ and src/ are in lint because the drift test (bun test ./ci) compares them.
-	lint: [/\.(ts|json)$/, /^bun\.lock$/, /^\.editorconfig$/, /^(pages|src)\//],
+	// pages/ and src/ are in lint because the drift test (bun test ./ci) compares them, and
+	// README.md because that suite checks its badges.
+	lint: [/\.(ts|json)$/, /^bun\.lock$/, /^\.editorconfig$/, /^README\.md$/, /^(pages|src)\//],
 	dockerfile: [/^Dockerfile$/, /^\.dockerignore$/, /^\.hadolint\.yaml$/],
 	// The docs Vale reads (scripts/lint-prose.sh), its config and its vocabulary.
 	prose: [
