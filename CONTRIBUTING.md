@@ -30,7 +30,7 @@ The image is the `Dockerfile`, the `Caddyfile` and the pages in `pages/`. The `C
 
 `pages/` is generated and committed. Edit `src/` (`template.html` for the layout, `poll.js`, `countdown.js` and `reload.js` for behaviour, `pages.ts` for each page's text), then run `bun run build`. `bun test ./ci` fails if `pages/` is stale. A bun script and not a site generator, so the image stays a plain `COPY` and the build needs nothing pinned beyond the base image.
 
-The tests in `test/` start the image with the same flags the README documents (read-only root, tmpfs, `cap_drop: ALL` plus `NET_BIND_SERVICE`). If a change needs another runtime setting, the tests fail until the README and `test/container.ts` both say so.
+The tests in `test/` start the image with the same flags the README documents (read-only root, tmpfs, `cap_drop: ALL` plus `NET_BIND_SERVICE`, 64 MB of memory and half a CPU). If a change needs another runtime setting, the tests fail until the README and `test/container.ts` both say so.
 
 Each page must stay one file with no external requests. A test fails on any request that leaves the origin. It also runs an axe-core scan in dark and light, with and without reduced motion.
 
