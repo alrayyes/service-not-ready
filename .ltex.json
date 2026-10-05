@@ -1,0 +1,23 @@
+{
+	"ltex.language": "en-US",
+	"ltex.dictionary": {
+		"en-US": [
+			"Codecov",
+			"lcov",
+			"tmpfs",
+			"Traefik",
+			"zstd",
+			"gzip",
+			"Healthcheck",
+			"busybox",
+			"commitlint",
+			"lockfile",
+			"lefthook",
+			"hadolint",
+			"LTeX"
+		]
+	},
+	"ltex.disabledRules": {
+		"en-US": ["PASSIVE_VOICE", "UPPERCASE_SENTENCE_START"]
+	}
+}

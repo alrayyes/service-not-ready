@@ -27,3 +27,4 @@ middleware
 Codecov
 lcov
 lefthook
+LTeX

@@ -1,0 +1,8 @@
+# Prettier is here for Markdown only: Biome formats everything else.
+# Generated, vendored or installed by tools, so nobody's prose.
+CHANGELOG.md
+node_modules/
+.claude/
+openspec/
+styles/Google/
+styles/proselint/

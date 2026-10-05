@@ -32,7 +32,7 @@ docker run --rm -i hadolint/hadolint < Dockerfile
 
 The image is the `Dockerfile`, the `Caddyfile` and the pages in `pages/`. The `Caddyfile` serves `/<name>.html` for the nine known names with a 200, and raises a 503 for every other request, serving `pages/503.html` from `handle_errors`, which is the only place Caddy lets a file go out with a non-200 status.
 
-`pages/` is generated and committed. Edit `src/` (`template.html` for the layout, `poll.js`, `countdown.js` and `reload.js` for behaviour, `pages.ts` for each page's text), then run `bun run build`. `bun test ./ci` fails if `pages/` is stale. A bun script and not a site generator, so the image stays a plain `COPY` and the build needs nothing pinned beyond the base image.
+`pages/` is generated and committed. Edit `src/` (`template.html` for the layout, `poll.js`, `countdown.js` and `reload.js` for behavior, `pages.ts` for each page's text), then run `bun run build`. `bun test ./ci` fails if `pages/` is stale. A bun script and not a site generator, so the image stays a plain `COPY` and the build needs nothing pinned beyond the base image.
 
 The tests in `test/` start the image with the same flags the README documents (read-only root, tmpfs, `cap_drop: ALL` plus `NET_BIND_SERVICE`, 64 MB of memory and half a CPU). If a change needs another runtime setting, the tests fail until the README and `test/container.ts` both say so.
 
@@ -45,6 +45,16 @@ Each page must stay one file with no external requests. A test fails on any requ
 ## Coverage
 
 The `lint` job runs `bun test --coverage ./ci` and writes the table to the job summary, so a drop is visible, and uploads the lcov report to [Codecov](https://codecov.io/gh/alrayyes/service-not-ready) with the `CODECOV_TOKEN` repository secret. A failed upload fails the job, except on Dependabot's runs, which get no secrets. `codecov.yml` turns off its status checks and PR comment, so coverage never gates a merge. It's a number to look at, not a target. Only the unit tests in `ci/` are measured. The Playwright tests are not measured: they drive a running container, so there are no lines of the code here for a tool to count.
+
+## Markdown
+
+Three checks run as separate CI jobs, so a red run says which. They run in `lefthook` hooks too: Prettier fixes staged Markdown on commit, and all three check on push.
+
+- **Layout: Prettier** (`bun run lint:md:format`, `bun run format:md` to fix). It's here for Markdown only, with `proseWrap: preserve` so it never moves a line break. Tables are why: it pads every cell and lines up the pipes.
+- **Structure: markdownlint-cli2** (`bun run lint:md:structure`), on top of its bundled Prettier style. `line-length` is re-enabled under its alias, not `MD013`, with a generous limit because paragraphs are one line each. A test (`ci/markdown.test.ts`) proves the limit still fails on a long line.
+- **Grammar: LTeX** (`bun run lint:md:grammar`) from the `ghcr.io/alrayyes/ltex-cli-plus` image, so it needs Docker. It exits 3 on a finding, and the CI job runs a canary (`an university`) to prove that. A term LTeX doesn't know goes in `.ltex.json`'s dictionary, and the same term goes in Vale's `accept.txt`: neither reads the other. Passive voice is off here because Vale covers it, and so is the capital-letter rule, which fires on the repository name in the title.
+
+The three read every Markdown file except `CHANGELOG.md` (generated) and the tool-installed `.claude/` and `openspec/`. They run only when Markdown or their config files change.
 
 ## Prose style
 

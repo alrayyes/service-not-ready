@@ -22,6 +22,14 @@ const groups = {
 		/^styles\//,
 		/^scripts\/lint-prose\.sh$/,
 	],
+	// Every Markdown file the three tiers lint (not the generated changelog or tool-installed
+	// files), their configs and the scripts they run.
+	markdown: [
+		/^(?!CHANGELOG\.md$|\.claude\/|openspec\/).*\.md$/,
+		/^\.(prettierrc|prettierignore|markdownlint-cli2\.yaml|ltex\.json)$/,
+		/^scripts\/lint-grammar\.sh$/,
+		/^(package\.json|bun\.lock)$/,
+	],
 	test: [
 		/^(Dockerfile|Caddyfile|\.dockerignore)$/,
 		/^(pages|src)\//,

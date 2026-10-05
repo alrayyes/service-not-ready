@@ -1,0 +1,16 @@
+# Structure. Prettier owns layout, so its rules come off; line-length stays on, under its
+# alias (an MD013 key would lose to the inherited `line-length: false`). Paragraphs are one
+# line each (proseWrap: preserve), so the limit is generous.
+extends: markdownlint/style/prettier
+
+config:
+  line-length:
+    line_length: 700
+
+ignores:
+  - CHANGELOG.md
+  - node_modules/**
+  - .claude/**
+  - openspec/**
+  - styles/Google/**
+  - styles/proselint/**
