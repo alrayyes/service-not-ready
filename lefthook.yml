@@ -13,6 +13,11 @@ pre-commit:
       glob: package.json
       run: bunx sort-package-json
       stage_fixed: true
+    # Prettier first: it decides the layout markdownlint then judges.
+    - name: prettier
+      glob: "*.md"
+      run: bunx prettier --write {staged_files}
+      stage_fixed: true
 
 commit-msg:
   jobs:
@@ -25,6 +30,16 @@ pre-push:
       run: bunx biome check .
     - name: sort-package-json
       run: bunx sort-package-json --check
+    - name: markdown format
+      glob: "*.md"
+      run: bun run lint:md:format
+    - name: markdown structure
+      glob: "*.md"
+      run: bun run lint:md:structure
+    # Needs Docker: the image carries its own JDK. About ten seconds.
+    - name: markdown grammar
+      glob: "*.md"
+      run: bun run lint:md:grammar
     - name: typecheck
       run: bunx tsc --noEmit
     # Includes the check that pages/ matches src/.

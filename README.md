@@ -3,9 +3,9 @@
 [![CI](https://github.com/alrayyes/service-not-ready/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/alrayyes/service-not-ready/actions/workflows/ci.yml)
 [![Codecov](https://codecov.io/gh/alrayyes/service-not-ready/graph/badge.svg)](https://codecov.io/gh/alrayyes/service-not-ready)
 [![Latest release](https://img.shields.io/github/v/release/alrayyes/service-not-ready)](https://github.com/alrayyes/service-not-ready/releases/latest)
-[![Licence: GPL-3.0-only](https://img.shields.io/github/license/alrayyes/service-not-ready)](LICENSE)
+[![License: GPL-3.0-only](https://img.shields.io/github/license/alrayyes/service-not-ready)](LICENSE)
 
-Error pages for when the thing behind your reverse proxy isn't answering. By default it answers every request with a `503`, tells clients to retry in 30 seconds, and shows a page that checks again on its own and loads the real service the moment it stops answering 503. It also carries a page in the same look for each error a proxy can produce (401, 403, 404, 429, 500, 502, 504 and a generic one), for a proxy's error middleware to ask for by status.
+Error pages for when the thing behind your reverse proxy isn't answering. By default, it answers every request with a `503`, tells clients to retry in 30 seconds, and shows a page that checks again on its own and loads the real service the moment it stops answering 503. It also carries a page in the same look for each error a proxy can produce (401, 403, 404, 429, 500, 502, 504 and a generic one), for a proxy's error middleware to ask for by status.
 
 It's one Caddy container with the pages baked in. No bind mounts, no external requests, no JavaScript or CSS from anywhere else: each page is a single file.
 
@@ -60,7 +60,7 @@ services:
 
 Why each setting is there:
 
-- **`read_only` and the two tmpfs mounts.** Caddy writes its autosaved config to `/config` and its state to `/data` even with nothing to manage. Docker's default tmpfs isn't writable by `nobody`, so each needs `mode=1777`. Without the mode you get "permission denied" errors in the log, though the page still serves.
+- **`read_only` and the two `tmpfs` mounts.** Caddy writes its autosaved config to `/config` and its state to `/data` even with nothing to manage. Docker's default tmpfs isn't writable by `nobody`, so each needs `mode=1777`. Without the mode you get "permission denied" errors in the log, though the page still serves.
 - **`cap_add: NET_BIND_SERVICE`.** The image only binds port 8080, but `/usr/bin/caddy` carries the `cap_net_bind_service` file capability. With `no-new-privileges` and everything else dropped, the kernel refuses to exec it (`operation not permitted`) and the container restart-loops. Verified against `caddy:2-alpine` 2.11.6.
 - **`--memory 64m` and `--cpus 0.5`.** An unbounded container can starve the host if something goes wrong in it, and a fallback shouldn't be able to take down the machine it's covering for. Caddy serving these pages sits well under both. Raise them if you put a lot of traffic on it.
 - **Runs as `nobody:nobody`.** That's baked in. Nothing to set.
@@ -76,17 +76,17 @@ Why each setting is there:
 
 The catch-all above is the default. The image also carries a page in the same look for each error a reverse proxy can produce, served at `/<name>.html`:
 
-| Path                | Meaning                           | Waits for the service?             |
-| ------------------- | --------------------------------- | ---------------------------------- |
-| `/404.html`         | No router matched the host        | no                                 |
-| `/401.html`         | Authentication required           | no                                 |
-| `/403.html`         | Access denied                     | no                                 |
-| `/429.html`         | Rate limited                      | counts down from `Retry-After`     |
-| `/500.html`         | Error from the backend            | no                                 |
-| `/502.html`         | Bad gateway                       | yes, polls and reloads             |
-| `/503.html`         | Service not ready                 | yes, polls and reloads             |
-| `/504.html`         | Gateway timeout                   | yes, polls and reloads             |
-| `/error.html`       | Any other 4xx or 5xx              | no                                 |
+| Path          | Meaning                    | Waits for the service?         |
+| ------------- | -------------------------- | ------------------------------ |
+| `/404.html`   | No router matched the host | no                             |
+| `/401.html`   | Authentication required    | no                             |
+| `/403.html`   | Access denied              | no                             |
+| `/429.html`   | Rate limited               | counts down from `Retry-After` |
+| `/500.html`   | Error from the backend     | no                             |
+| `/502.html`   | Bad gateway                | yes, polls and reloads         |
+| `/503.html`   | Service not ready          | yes, polls and reloads         |
+| `/504.html`   | Gateway timeout            | yes, polls and reloads         |
+| `/error.html` | Any other 4xx or 5xx       | no                             |
 
 Requested directly, these answer `200` with `Cache-Control: no-store` and the same security headers as the catch-all. Any other path still answers `503` with `Retry-After`. Only the names above are special.
 

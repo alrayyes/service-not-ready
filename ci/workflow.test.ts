@@ -66,3 +66,20 @@ test("the audit job ignores only GHSA-vfj7-8cjw-p6xm", () => {
 	const run = (workflow.jobs.audit?.steps ?? []).map((s) => s.run ?? "").join("\n");
 	expect([...run.matchAll(/--ignore[= ](\S+)/g)].map((m) => m[1])).toEqual(["GHSA-vfj7-8cjw-p6xm"]);
 });
+
+// The three Markdown tiers (rules/markdown.md) are separate jobs, so a red run names the tier,
+// and each is skipped when no Markdown changed.
+test.each(["markdown-format", "markdown-structure", "markdown-grammar"])(
+	"%s is its own job, gated on the markdown path group",
+	(name) => {
+		const job = workflow.jobs[name] as unknown as { if?: string; needs?: string };
+		expect(job, name).toBeDefined();
+		expect(job.needs).toBe("changes");
+		expect(job.if).toContain("needs.changes.outputs.markdown");
+	},
+);
+
+test("the grammar job proves LTeX fails on a real error", () => {
+	const steps = (workflow.jobs["markdown-grammar"]?.steps ?? []).map((s) => s.run ?? "");
+	expect(steps.some((r) => r.includes("an university"))).toBe(true);
+});

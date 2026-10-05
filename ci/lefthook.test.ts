@@ -29,6 +29,20 @@ test("pre-commit lets biome and sort-package-json fix and restage a commit", () 
 	expect(sort?.stage_fixed).toBe(true);
 });
 
+test("pre-commit lets prettier fix and restage Markdown", () => {
+	const prettier = hook("pre-commit").find((j) => j.run?.includes("prettier"));
+	expect(prettier?.run).toContain("--write");
+	expect(prettier?.stage_fixed).toBe(true);
+	expect(prettier?.glob).toBe("*.md");
+});
+
+test("pre-push checks the three Markdown tiers without writing", () => {
+	const all = runs("pre-push").join("\n");
+	for (const expected of ["lint:md:format", "lint:md:structure", "lint:md:grammar"]) {
+		expect(all, expected).toContain(expected);
+	}
+});
+
 test("commit-msg runs commitlint", () => {
 	expect(runs("commit-msg").some((r) => r.includes("commitlint"))).toBe(true);
 });
