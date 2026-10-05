@@ -72,7 +72,20 @@ jobs:
       - run: bun run lint
       - run: bun run typecheck
       - run: bun run sort
-      - run: bun test ./ci
+      # Unit-test coverage, for visibility and not as a target. It covers only ./ci: the
+      # Playwright tests drive a container, so there is no line coverage to measure.
+      - name: Test with coverage
+        run: |
+          status=0
+          bun test --coverage ./ci > coverage.txt 2>&1 || status=$?
+          cat coverage.txt
+          {
+            echo '### Unit-test coverage (`bun test --coverage ./ci`)'
+            echo '```'
+            cat coverage.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          exit "$status"
 
   # Style is advice, so Vale only fails the job on its error-level rules (a product name
   # spelled wrong); warnings print. Official image, run through the same script as a local run.

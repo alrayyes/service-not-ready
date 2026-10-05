@@ -38,6 +38,10 @@ Each page must stay one file with no external requests. A test fails on any requ
 
 `bun run screenshot [dir]` shoots every page from the image (`IMAGE`, default `service-not-ready:test`) into `dir` (default `.`) as `screenshot-<name>.png`, at a fixed size, dark scheme and reduced motion. The release job runs it against the image it just published and attaches all nine to the release. The README embeds `releases/latest/download/screenshot-<name>.png`, so the screenshots update on release with no commit. Change `test/screenshot.ts` if they should look different, and add a page's name to `NAMES` there (and to the test's own list) when you add a page.
 
+## Coverage
+
+The `lint` job runs `bun test --coverage ./ci` and writes the table to the job summary, so a drop is visible. It's a number to look at, not a target. Only the unit tests in `ci/` are measured. The Playwright tests are not measured: they drive a running container, so there are no lines of the code here for a tool to count.
+
 ## Prose style
 
 `scripts/lint-prose.sh` runs [Vale](https://vale.sh) over `README.md`, `CONTRIBUTING.md` and `SECURITY.md`, from the official `jdkato/vale` image when `vale` isn't installed (it needs Docker). Style is advice, so warnings print and only error-level rules, such as a misspelled product name, fail. A new product name or term goes in `styles/config/vocabularies/House/accept.txt`. The `prose` CI job runs the same script in the same image.
