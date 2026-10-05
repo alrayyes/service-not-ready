@@ -8,6 +8,11 @@ on:
 permissions:
   contents: read
 
+# Hooks are for a developer's machine. A job that runs `git commit` or `git push` itself
+# mustn't fire them, and `bun install` shouldn't install them.
+env:
+  LEFTHOOK: "0"
+
 # A superseded pull request run is cancelled. A run on main never is: cancelling it between
 # the release job and the image job would leave a tag with no image behind it.
 concurrency:

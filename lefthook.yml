@@ -1,0 +1,45 @@
+# Runs what CI runs, so CI doesn't find what this machine could. pre-commit may fix and
+# restage; pre-push only checks, over the whole tree, and never writes. Set LEFTHOOK=0 to
+# skip hooks for one command. CI does, since it has no business running them.
+output: [failure]
+
+pre-commit:
+  jobs:
+    - name: biome
+      glob: "*.{ts,json}"
+      run: bunx biome check --write --no-errors-on-unmatched {staged_files}
+      stage_fixed: true
+    - name: sort-package-json
+      glob: package.json
+      run: bunx sort-package-json
+      stage_fixed: true
+
+commit-msg:
+  jobs:
+    - name: commitlint
+      run: bunx commitlint --edit {1}
+
+pre-push:
+  jobs:
+    - name: biome
+      run: bunx biome check .
+    - name: sort-package-json
+      run: bunx sort-package-json --check
+    - name: typecheck
+      run: bunx tsc --noEmit
+    # Includes the check that pages/ matches src/.
+    - name: ci tests
+      run: bun test ./ci
+    - name: hadolint
+      glob: ["Dockerfile", ".dockerignore", ".hadolint.yaml"]
+      run: >-
+        docker run --rm -v "$PWD:/work" -w /work --entrypoint ""
+        hadolint/hadolint:v2.14.0-alpine@sha256:7aba693c1442eb31c0b015c129697cb3b6cb7da589d85c7562f9deb435a6657c
+        hadolint Dockerfile
+    - name: docker build
+      glob: ["Dockerfile", "Caddyfile", ".dockerignore", "pages/*", "src/*"]
+      run: docker build --quiet --tag service-not-ready:test .
+    # Builds the image itself, so it is the slow one: about 15 seconds.
+    - name: image tests
+      glob: ["Dockerfile", "Caddyfile", ".dockerignore", "pages/*", "src/*", "test/*", "scripts/build-pages.ts", "playwright.config.ts", "package.json", "bun.lock"]
+      run: bunx playwright test

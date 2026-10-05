@@ -9,6 +9,7 @@
 		"build:check": "bun scripts/build-pages.ts --check",
 		"format": "biome check --write .",
 		"lint": "biome check .",
+		"prepare": "lefthook install",
 		"screenshot": "bun scripts/screenshot.ts",
 		"sort": "sort-package-json --check",
 		"test": "playwright test",
@@ -22,6 +23,7 @@
 		"@playwright/test": "1.63.0",
 		"@types/bun": "1.4.2",
 		"@types/node": "26.6.4",
+		"lefthook": "2.1.17",
 		"sort-package-json": "4.0.0",
 		"typescript": "7.0.2"
 	},

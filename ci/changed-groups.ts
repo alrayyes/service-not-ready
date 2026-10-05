@@ -11,6 +11,7 @@ const groups = {
 		/^\.editorconfig$/,
 		/^README\.md$/,
 		/^codecov\.yml$/,
+		/^lefthook\.yml$/,
 		/^(pages|src)\//,
 	],
 	dockerfile: [/^Dockerfile$/, /^\.dockerignore$/, /^\.hadolint\.yaml$/],
