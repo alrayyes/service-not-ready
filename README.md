@@ -1,12 +1,12 @@
 # service-not-ready
 
-A "service not ready" page for when the thing behind your reverse proxy is still starting. It answers every request with a `503`, tells clients to retry in 30 seconds, and shows a page that checks again on its own and loads the real service the moment it stops answering 503.
+Error pages for when the thing behind your reverse proxy isn't answering. By default it answers every request with a `503`, tells clients to retry in 30 seconds, and shows a page that checks again on its own and loads the real service the moment it stops answering 503. It also carries a page in the same look for each error a proxy can produce (401, 403, 404, 429, 500, 502, 504 and a generic one), for a proxy's error middleware to ask for by status.
 
 It's one Caddy container with the pages baked in. No bind mounts, no external requests, no JavaScript or CSS from anywhere else: each page is a single file.
 
 Image: `ghcr.io/alrayyes/service-not-ready`
 
-![The service not ready page: a neon cityscape behind a card reading "Service not ready", a checking-again countdown and a Retry now button.](https://github.com/alrayyes/service-not-ready/releases/latest/download/screenshot.png)
+![The service not ready page: a neon cityscape behind a card reading "Service not ready", a checking-again countdown and a Retry now button.](https://github.com/alrayyes/service-not-ready/releases/latest/download/screenshot-503.png)
 
 ## Requirements
 
@@ -81,6 +81,46 @@ The catch-all above is the default. The image also carries a page in the same lo
 
 Requested directly, these answer `200` with `Cache-Control: no-store` and the same security headers as the catch-all. Any other path still answers `503` with `Retry-After`. Only the names above are special.
 
+### Every page
+
+Each release attaches a fresh screenshot of every page, taken from the image it published.
+
+**`/401.html`**
+
+![Sign in required (401).](https://github.com/alrayyes/service-not-ready/releases/latest/download/screenshot-401.png)
+
+**`/403.html`**
+
+![Access denied (403).](https://github.com/alrayyes/service-not-ready/releases/latest/download/screenshot-403.png)
+
+**`/404.html`**
+
+![Page not found (404).](https://github.com/alrayyes/service-not-ready/releases/latest/download/screenshot-404.png)
+
+**`/429.html`**
+
+![Slow down (429), with a countdown.](https://github.com/alrayyes/service-not-ready/releases/latest/download/screenshot-429.png)
+
+**`/500.html`**
+
+![Something broke (500).](https://github.com/alrayyes/service-not-ready/releases/latest/download/screenshot-500.png)
+
+**`/502.html`**
+
+![Bad gateway (502), which polls for the service.](https://github.com/alrayyes/service-not-ready/releases/latest/download/screenshot-502.png)
+
+**`/503.html`**
+
+![Service not ready (503), which polls for the service.](https://github.com/alrayyes/service-not-ready/releases/latest/download/screenshot-503.png)
+
+**`/504.html`**
+
+![Gateway timeout (504), which polls for the service.](https://github.com/alrayyes/service-not-ready/releases/latest/download/screenshot-504.png)
+
+**`/error.html`**
+
+![Something went wrong, the page for any other 4xx or 5xx.](https://github.com/alrayyes/service-not-ready/releases/latest/download/screenshot-error.png)
+
 ### With Traefik's `errors` middleware
 
 Traefik asks this service for `/{status}.html` and returns the body with the original status code, so the visitor sees a `404` page with a `404` status:
@@ -106,9 +146,9 @@ The polling pages (502, 503, 504) check their own URL, so they reload when the o
 
 ## What it serves
 
-Every path, method and `Host` gets the same answer: status `503`, `Retry-After`, `Cache-Control: no-store`, the page body, and `X-Content-Type-Options`, `Referrer-Policy` and `Content-Security-Policy` headers. The `Server` header is removed and responses are compressed with zstd or gzip when the client accepts them.
+Every path, method and `Host` except those page names gets the same answer: status `503`, `Retry-After`, `Cache-Control: no-store`, the page body, and `X-Content-Type-Options`, `Referrer-Policy` and `Content-Security-Policy` headers. The `Server` header is removed and responses are compressed with zstd or gzip when the client accepts them.
 
-There is no separate 404 page, because nothing is "not found" on a fallback. A request for `/favicon.ico` is a request to a service that isn't ready.
+The page body is `/503.html`. Nothing is "not found" on a fallback, so a request for `/favicon.ico` or any other path is a request to a service that isn't ready, and gets the same `503`. Only the names in [Pages for other errors](#pages-for-other-errors) are special.
 
 The page polls its own URL with `fetch(location.href, { cache: "no-store" })` and reloads when the status is anything but 503. It has no meta refresh, a visible status line in a polite live region, and a Retry button. It follows `prefers-color-scheme` (a dark neon theme and a light one) and `prefers-reduced-motion`.
 

@@ -34,9 +34,9 @@ The tests in `test/` start the image with the same flags the README documents (r
 
 Each page must stay one file with no external requests. A test fails on any request that leaves the origin. It also runs an axe-core scan in dark and light, with and without reduced motion.
 
-## The README screenshot
+## The README screenshots
 
-`bun run screenshot [file]` shoots the page from the image (`IMAGE`, default `service-not-ready:test`) at a fixed size, dark scheme and reduced motion. The release job runs it against the image it just published and attaches `screenshot.png` to the release. The README embeds `releases/latest/download/screenshot.png`, so it updates on release with no commit. Change `test/screenshot.ts` if the shot should look different.
+`bun run screenshot [dir]` shoots every page from the image (`IMAGE`, default `service-not-ready:test`) into `dir` (default `.`) as `screenshot-<name>.png`, at a fixed size, dark scheme and reduced motion. The release job runs it against the image it just published and attaches all nine to the release. The README embeds `releases/latest/download/screenshot-<name>.png`, so the screenshots update on release with no commit. Change `test/screenshot.ts` if they should look different, and add a page's name to `NAMES` there (and to the test's own list) when you add a page.
 
 ## Prose style
 
