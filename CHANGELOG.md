@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.3.1](https://github.com/alrayyes/service-not-ready/compare/v0.3.0...v0.3.1) (2026-10-06)
+
+
+### Bug Fixes
+
+* call the release steps directly, not through wretry.action ([96d5772](https://github.com/alrayyes/service-not-ready/commit/96d5772201a477644e6d0192148d9060269b0337))
+* call the release steps directly, not through wretry.action ([f99d8f9](https://github.com/alrayyes/service-not-ready/commit/f99d8f978a0e565006979788ddbe7d2dfd5df69f))
+* override smol-toml and katex to their patched releases ([3e84a4b](https://github.com/alrayyes/service-not-ready/commit/3e84a4bfdb6d8b29756a4c2561f7f75769d77ede))
+* override smol-toml and katex to their patched releases ([647bf9b](https://github.com/alrayyes/service-not-ready/commit/647bf9bae028da020237a07c6560ca0c9538d479))
+
 ## [0.3.0](https://github.com/alrayyes/service-not-ready/compare/v0.2.0...v0.3.0) (2026-10-03)
 
 
