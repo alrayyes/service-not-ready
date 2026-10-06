@@ -13,23 +13,18 @@ const workflow = Bun.YAML.parse(
 
 const steps = Object.values(workflow.jobs).flatMap((job) => job.steps);
 
-// Calls to rate-limited APIs, which an outage or a 403 strands: rules/release-publishing.md
-// wants each wrapped in Wandalen/wretry.action, not run bare.
-const WRAPPED = ["googleapis/release-please-action", "actions/attest-build-provenance"];
+// Under Node 24 Wandalen/wretry.action reports success and never runs the action it wraps, so
+// a release silently stops. Release steps are called directly, SHA-pinned.
+const DIRECT = ["googleapis/release-please-action", "actions/attest-build-provenance"];
 
-test.each(WRAPPED)("%s only runs inside a SHA-pinned wretry.action, 3 attempts", (action) => {
-	expect(steps.filter((s) => s.uses?.startsWith(`${action}@`))).toEqual([]);
-	const wrapped = steps.filter(
-		(s) =>
-			s.uses?.startsWith("Wandalen/wretry.action@") &&
-			String(s.with?.action).startsWith(`${action}@`),
-	);
-	expect(wrapped).toHaveLength(1);
-	const [step] = wrapped;
-	if (!step) throw new Error(action);
-	expect(step.uses).toMatch(/^Wandalen\/wretry\.action@[0-9a-f]{40}$/);
-	expect(String(step.with?.action)).toMatch(/@[0-9a-f]{40}$/);
-	expect(step.with?.attempt_limit).toBe(3);
+test("no step runs inside Wandalen/wretry.action", () => {
+	expect(steps.filter((s) => s.uses?.startsWith("Wandalen/wretry.action@"))).toEqual([]);
+});
+
+test.each(DIRECT)("%s is a direct, SHA-pinned step", (action) => {
+	const direct = steps.filter((s) => s.uses?.startsWith(`${action}@`));
+	expect(direct).toHaveLength(1);
+	expect(direct[0]?.uses).toMatch(/@[0-9a-f]{40}$/);
 });
 
 test("the lint job reports unit-test coverage in the job summary", () => {
