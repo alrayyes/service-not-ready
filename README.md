@@ -165,6 +165,14 @@ The page polls its own URL with `fetch(location.href, { cache: "no-store" })` an
 
 The image's `HEALTHCHECK` passes when the server answers `503`. A fallback that returns 200 would be the broken one, so `wget`'s usual "non-2xx is a failure" is the wrong signal. It checks `127.0.0.1` on `LISTEN_PORT`, not `localhost`, because busybox `wget` tries `::1` first and is refused by an IPv4-only listener.
 
+## Reports
+
+Every push to `main` that passes CI publishes its reports:
+
+- [Index](https://apis.ryankes.eu/service-not-ready/reports/), with the commit and date.
+- Tests: [unit](https://apis.ryankes.eu/service-not-ready/reports/tests/unit.xml) and [end-to-end](https://apis.ryankes.eu/service-not-ready/reports/tests/e2e.xml) results as JUnit XML, and the [Playwright report](https://apis.ryankes.eu/service-not-ready/reports/tests/playwright/index.html).
+- Coverage: the [HTML view](https://apis.ryankes.eu/service-not-ready/reports/coverage/), [Cobertura `coverage.xml`](https://apis.ryankes.eu/service-not-ready/reports/coverage/coverage.xml) and [`lcov.info`](https://apis.ryankes.eu/service-not-ready/reports/coverage/lcov.info). It covers only the unit tests of the tooling in `ci/`, since the Playwright tests drive a container.
+
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md).
