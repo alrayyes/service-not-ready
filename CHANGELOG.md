@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.4.1](https://github.com/alrayyes/service-not-ready/compare/v0.4.0...v0.4.1) (2026-10-09)
+
+
+### Bug Fixes
+
+* **hooks:** sort only the staged package.json in pre-commit ([fff0a86](https://github.com/alrayyes/service-not-ready/commit/fff0a86339f3152746c1664867565a5c6e3e85c6))
+* **hooks:** sort only the staged package.json in pre-commit ([229958d](https://github.com/alrayyes/service-not-ready/commit/229958d5fe4d2cf5294a3f5f4c40cfdacc0da296))
+
 ## [0.4.0](https://github.com/alrayyes/service-not-ready/compare/v0.3.1...v0.4.0) (2026-10-09)
 
 
