@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.0](https://github.com/alrayyes/service-not-ready/compare/v0.3.1...v0.4.0) (2026-10-09)
+
+
+### Features
+
+* **ci:** publish test and coverage reports to GitHub Pages ([#55](https://github.com/alrayyes/service-not-ready/issues/55)) ([2b21af9](https://github.com/alrayyes/service-not-ready/commit/2b21af955c8df4813c05162118d365d5e5243bf9))
+
 ## [0.3.1](https://github.com/alrayyes/service-not-ready/compare/v0.3.0...v0.3.1) (2026-10-06)
 
 
