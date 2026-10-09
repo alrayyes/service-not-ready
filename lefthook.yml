@@ -11,7 +11,7 @@ pre-commit:
       stage_fixed: true
     - name: sort-package-json
       glob: package.json
-      run: bunx sort-package-json
+      run: bunx sort-package-json {staged_files}
       stage_fixed: true
     # Prettier first: it decides the layout markdownlint then judges. Markdown and YAML are its remit.
     - name: prettier
