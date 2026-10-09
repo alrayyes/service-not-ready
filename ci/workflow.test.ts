@@ -2,6 +2,8 @@ import { expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
 
 interface Step {
+	name?: string;
+	if?: string;
 	uses?: string;
 	run?: string;
 	with?: Record<string, string | number | boolean>;
@@ -9,7 +11,12 @@ interface Step {
 
 const workflow = Bun.YAML.parse(
 	readFileSync(new URL("../.github/workflows/ci.yml", import.meta.url), "utf8"),
-) as { jobs: Record<string, { steps: Step[] }> };
+) as {
+	jobs: Record<
+		string,
+		{ steps: Step[]; needs?: string | string[]; if?: string; environment?: { name: string } }
+	>;
+};
 
 const steps = Object.values(workflow.jobs).flatMap((job) => job.steps);
 
@@ -84,4 +91,72 @@ test("yaml-format is its own job, gated on the yaml path group", () => {
 	expect(job).toBeDefined();
 	expect(job.needs).toBe("changes");
 	expect(job.if).toContain("needs.changes.outputs.yaml");
+});
+
+// The reports (alrayyes.github.io#158): one Pages deployment, behind every other check.
+const asList = (needs: string | string[] | undefined) => (Array.isArray(needs) ? needs : [needs]);
+
+test("the lint job writes JUnit and converts lcov to Cobertura, on pull requests too", () => {
+	const steps = workflow.jobs.lint?.steps ?? [];
+	const tests = steps.find((s) => s.run?.includes("bun test --coverage"));
+	expect(tests?.run).toContain("--reporter=junit");
+	expect(tests?.run).toContain("reports/unit.xml");
+	const convert = steps.find((s) => s.run?.includes("lcov_cobertura"));
+	expect(convert?.run).toMatch(/lcov_cobertura==\d+\.\d+\.\d+/);
+	expect(convert?.if).toBeUndefined();
+});
+
+test("the report jobs upload what they write", () => {
+	for (const job of ["lint", "test"]) {
+		const names = (workflow.jobs[job]?.steps ?? [])
+			.filter((s) => s.uses?.startsWith("actions/upload-artifact@"))
+			.map((s) => s.with?.name);
+		expect(
+			names.some((n) => String(n).startsWith("report-")),
+			job,
+		).toBe(true);
+	}
+});
+
+test("the reports job needs every other job and assembles on pull requests too", () => {
+	const reports = workflow.jobs.reports;
+	expect(reports).toBeDefined();
+	const others = Object.keys(workflow.jobs).filter(
+		(name) => !["changes", "reports", "pages", "release", "image", "commits"].includes(name),
+	);
+	for (const name of others) expect(asList(reports?.needs), name).toContain(name);
+	expect(reports?.if).toContain("always()");
+	expect(reports?.if).not.toContain("github.event_name == 'push'");
+});
+
+test("only a push to main uploads the Pages artifact and only the pages job deploys", () => {
+	const upload = workflow.jobs.reports?.steps.find((s) =>
+		s.uses?.startsWith("actions/upload-pages-artifact@"),
+	);
+	expect(upload?.if).toContain("github.ref == 'refs/heads/main'");
+	const pages = workflow.jobs.pages;
+	expect(asList(pages?.needs)).toEqual(["reports"]);
+	expect(pages?.if).toContain("github.event_name == 'push'");
+	expect(pages?.environment?.name).toBe("github-pages");
+	const all = Object.values(workflow.jobs).flatMap((j) => j.steps);
+	expect(all.filter((s) => s.uses?.startsWith("actions/deploy-pages@"))).toHaveLength(1);
+});
+
+test("the pages job checks the live coverage.xml after the deploy", () => {
+	const steps = workflow.jobs.pages?.steps ?? [];
+	const deploy = steps.findIndex((s) => s.uses?.startsWith("actions/deploy-pages@"));
+	const check = steps.findIndex((s) => s.run?.includes("reports/coverage/coverage.xml"));
+	expect(deploy).toBeGreaterThanOrEqual(0);
+	expect(check).toBeGreaterThan(deploy);
+	expect(steps[check]?.run).toContain("grep -q '<coverage '");
+});
+
+test("every Pages action is pinned by SHA", () => {
+	const pinned = steps.filter((s) =>
+		/^actions\/(deploy-pages|upload-pages-artifact|download-artifact|configure-pages)@/.test(
+			s.uses ?? "",
+		),
+	);
+	expect(pinned.length).toBeGreaterThan(0);
+	for (const s of pinned) expect(s.uses).toMatch(/@[0-9a-f]{40}$/);
 });

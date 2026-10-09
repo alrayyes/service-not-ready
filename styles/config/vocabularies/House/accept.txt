@@ -28,3 +28,5 @@ Codecov
 lcov
 lefthook
 LTeX
+JUnit
+Cobertura

@@ -7,6 +7,14 @@ export default defineConfig({
 	fullyParallel: true,
 	forbidOnly: !!process.env.CI,
 	retries: 0,
-	reporter: process.env.CI ? [["github"], ["list"]] : "list",
+	// CI also writes the JUnit file and the HTML report that the reports page publishes.
+	reporter: process.env.CI
+		? [
+				["github"],
+				["list"],
+				["junit", { outputFile: "reports/e2e.xml" }],
+				["html", { open: "never", outputFolder: "playwright-report" }],
+			]
+		: "list",
 	use: { trace: "retain-on-failure" },
 });

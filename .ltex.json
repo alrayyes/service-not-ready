@@ -14,7 +14,9 @@
 			"lockfile",
 			"lefthook",
 			"hadolint",
-			"LTeX"
+			"LTeX",
+			"Cobertura",
+			"JUnit"
 		]
 	},
 	"ltex.disabledRules": {
