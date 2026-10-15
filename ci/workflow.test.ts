@@ -1,6 +1,5 @@
 import { expect, test } from "bun:test";
-import { readFileSync } from "node:fs";
-import { Glob } from "bun";
+import { readdirSync, readFileSync } from "node:fs";
 
 interface Step {
 	name?: string;
@@ -66,10 +65,11 @@ test("Codecov adds no status checks and no PR comment", () => {
 
 // rules/dependencies.md: a pull request fails only on advisories it introduces, and a scan
 // keeps everything already on main in one ticket (#73). No ignore list, anywhere.
-const workflowFiles = new Glob(".github/workflows/*.{yml,yaml}");
-const workflowTexts = [
-	...workflowFiles.scanSync({ cwd: new URL("..", import.meta.url).pathname, absolute: true }),
-].map((file) => readFileSync(file, "utf8"));
+// readdirSync, not Bun's Glob: bun 1.3's scan skips the dot directory unless asked.
+const workflowDir = new URL("../.github/workflows/", import.meta.url);
+const workflowTexts = readdirSync(workflowDir)
+	.filter((name) => /\.ya?ml$/.test(name))
+	.map((name) => readFileSync(new URL(name, workflowDir), "utf8"));
 
 test("no workflow ignores an advisory", () => {
 	expect(workflowTexts.length).toBeGreaterThan(0);
