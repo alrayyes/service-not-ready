@@ -82,3 +82,28 @@ test.each(rendered.filter((r) => r.page.kind === "back" || r.page.kind === "relo
 		expect(html).not.toContain("checking again");
 	},
 );
+
+// Literal expectations, so the tests above can't agree with a wrong PAGES row just because
+// both read it. If a heading or status code changes on purpose, change it here too.
+test("the nine pages have these headings", () => {
+	expect(Object.fromEntries(PAGES.map((p) => [p.name, p.heading]))).toEqual({
+		"401": "Sign in required",
+		"403": "Access denied",
+		"404": "Page not found",
+		"429": "Slow down",
+		"500": "Something broke",
+		"502": "Bad gateway",
+		"503": "Service not ready",
+		"504": "Gateway timeout",
+		error: "Something went wrong",
+	});
+});
+
+test("only 502, 503 and 504 poll, each for its own status", () => {
+	expect(
+		Object.fromEntries(PAGES.filter((p) => p.kind === "poll").map((p) => [p.name, p.code])),
+	).toEqual({ "502": 502, "503": 503, "504": 504 });
+	expect(render(PAGES.find((p) => p.name === "503") as (typeof PAGES)[number])).toContain(
+		"r.status !== 503",
+	);
+});
