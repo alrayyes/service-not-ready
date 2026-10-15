@@ -10,29 +10,25 @@ test.beforeAll(async () => {
 });
 test.afterAll(() => stop(c.name));
 
+// Which paths, methods and Hosts get a 503, and the headers and compression on it, are
+// single Caddyfile directives and are asserted in ci/caddyfile.test.ts. These requests prove
+// Caddy honours them.
 test.describe("every request is a 503", () => {
-	for (const path of ["/", "/anything", "/deep/path?with=query", "/favicon.ico"]) {
-		test(`GET ${path}`, async ({ request }) => {
-			const res = await request.get(c.url + path);
-			expect(res.status()).toBe(503);
-			expect(res.headers()["retry-after"]).toBe("30");
-			expect(res.headers()["cache-control"]).toBe("no-store");
-			expect(res.headers()["content-type"]).toContain("text/html");
-			expect(await res.text()).toContain("Service not ready");
-		});
-	}
-
-	for (const method of ["HEAD", "POST", "PUT", "DELETE"] as const) {
-		test(method, async ({ request }) => {
-			const res = await request.fetch(`${c.url}/`, { method });
-			expect(res.status()).toBe(503);
-			expect(res.headers()["retry-after"]).toBe("30");
-		});
-	}
-
-	test("ignores the Host header", async ({ request }) => {
-		const res = await request.get(c.url, { headers: { Host: "example.com" } });
+	test("GET /", async ({ request }) => {
+		const res = await request.get(c.url);
 		expect(res.status()).toBe(503);
+		expect(res.headers()["retry-after"]).toBe("30");
+		expect(res.headers()["cache-control"]).toBe("no-store");
+		expect(res.headers()["content-type"]).toContain("text/html");
+		expect(await res.text()).toContain("Service not ready");
+	});
+
+	test("a POST to any other Host", async ({ request }) => {
+		const res = await request.post(`${c.url}/anything?with=query`, {
+			headers: { Host: "example.com" },
+		});
+		expect(res.status()).toBe(503);
+		expect(res.headers()["retry-after"]).toBe("30");
 	});
 });
 
@@ -46,16 +42,14 @@ test.describe("response headers", () => {
 		expect(h.server).toBeUndefined();
 	});
 
-	for (const enc of ["zstd", "gzip"]) {
-		test(`compresses with ${enc}`, async ({ request }) => {
-			const res = await request.get(c.url, {
-				headers: { "Accept-Encoding": enc },
-				// Playwright would transparently decode and hide the header's effect otherwise.
-				failOnStatusCode: false,
-			});
-			expect(res.headers()["content-encoding"]).toBe(enc);
+	test("compresses with zstd", async ({ request }) => {
+		const res = await request.get(c.url, {
+			headers: { "Accept-Encoding": "zstd" },
+			// Playwright would transparently decode and hide the header's effect otherwise.
+			failOnStatusCode: false,
 		});
-	}
+		expect(res.headers()["content-encoding"]).toBe("zstd");
+	});
 });
 
 test.describe("hardening", () => {
