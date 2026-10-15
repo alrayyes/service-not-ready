@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 
 interface Step {
 	name?: string;
@@ -63,16 +63,51 @@ test("Codecov adds no status checks and no PR comment", () => {
 	expect(codecov.comment).toBe(false);
 });
 
-// An advisory with no patched version is the only justified ignore, and each is listed here
-// by ID: braces (#46), and the two against extract-zip, which @lhci/cli reaches through
-// lighthouse > puppeteer-core and which has no fix at any version.
-test("the audit job ignores only the advisories with no published fix", () => {
-	const run = (workflow.jobs.audit?.steps ?? []).map((s) => s.run ?? "").join("\n");
-	expect([...run.matchAll(/--ignore[= ](\S+)/g)].map((m) => m[1])).toEqual([
-		"GHSA-vfj7-8cjw-p6xm",
-		"GHSA-jmr9-qjv8-65gv",
-		"GHSA-7pqw-9j4j-h8q3",
-	]);
+// rules/dependencies.md: a pull request fails only on advisories it introduces, and a scan
+// keeps everything already on main in one ticket (#73). No ignore list, anywhere.
+// readdirSync, not Bun's Glob: bun 1.3's scan skips the dot directory unless asked.
+const workflowDir = new URL("../.github/workflows/", import.meta.url);
+const workflowTexts = readdirSync(workflowDir)
+	.filter((name) => /\.ya?ml$/.test(name))
+	.map((name) => readFileSync(new URL(name, workflowDir), "utf8"));
+
+test("no workflow ignores an advisory", () => {
+	expect(workflowTexts.length).toBeGreaterThan(0);
+	for (const text of workflowTexts) expect(text).not.toMatch(/--ignore[= ]/);
+});
+
+const advisoryScan = (s: Step) => /^alrayyes\/advisory-scan@[0-9a-f]{40}$/.test(s.uses ?? "");
+
+test("the audit job gates on what the change introduces, when the lockfile changes", () => {
+	const audit = workflow.jobs.audit as unknown as { if?: string; needs?: string; steps: Step[] };
+	expect(audit.needs).toBe("changes");
+	expect(audit.if).toContain("needs.changes.outputs.deps");
+	const gate = audit.steps.filter(advisoryScan);
+	expect(gate).toHaveLength(1);
+	expect(gate[0]?.with?.mode).toBe("gate");
+	expect(gate[0]?.with?.command).toBe("bun audit");
+});
+
+test("a scan of main keeps the advisory ticket, daily, on lockfile pushes and on dispatch", () => {
+	const scan = Bun.YAML.parse(
+		readFileSync(new URL("../.github/workflows/advisory-scan.yml", import.meta.url), "utf8"),
+	) as {
+		on: {
+			schedule: { cron: string }[];
+			push: { branches: string[]; paths: string[] };
+			workflow_dispatch: unknown;
+		};
+		jobs: Record<string, { permissions?: Record<string, string>; steps: Step[] }>;
+	};
+	expect(scan.on.schedule).toHaveLength(1);
+	expect(scan.on.push.branches).toEqual(["main"]);
+	expect(scan.on.push.paths).toEqual(expect.arrayContaining(["package.json", "bun.lock"]));
+	expect("workflow_dispatch" in scan.on).toBe(true);
+	const job = Object.values(scan.jobs)[0];
+	expect(job?.permissions).toEqual({ contents: "read", issues: "write" });
+	const step = job?.steps.find(advisoryScan);
+	expect(step?.with?.mode).toBe("scan");
+	expect(step?.with?.command).toBe("bun audit");
 });
 
 // The three Markdown tiers (rules/markdown.md) are separate jobs, so a red run names the tier,

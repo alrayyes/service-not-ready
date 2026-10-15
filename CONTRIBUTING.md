@@ -64,7 +64,11 @@ The three read every Markdown file except `CHANGELOG.md` (generated) and the too
 
 ## CI path filtering
 
-On a pull request, `lint`, `dockerfile`, `test` and `prose` run only when files they cover change, so a README edit builds nothing. `ci/changed-groups.ts` holds the file lists (`bun test ./ci` covers them), and editing `ci.yml` runs all four. The secret scan, audit and commit lint always run, and a push to `main` runs everything. Add a file a job reads to its list, or the job skips a change that could break it.
+On a pull request, `lint`, `dockerfile`, `test`, `prose` and `audit` run only when files they cover change, so a README edit builds nothing. `ci/changed-groups.ts` holds the file lists (`bun test ./ci` covers them), and editing `ci.yml` runs all of them. The secret scan and commit lint always run, and a push to `main` runs everything. Add a file a job reads to its list, or the job skips a change that could break it.
+
+## Dependency advisories
+
+Two jobs share the work, both through [advisory-scan](https://github.com/alrayyes/advisory-scan). The `audit` job runs `bun audit` on the pull request and on its base, and fails only on advisories the pull request adds, so an advisory published overnight doesn't turn unrelated pull requests red. `advisory-scan.yml` audits `main` daily, on every push that changes `package.json` or `bun.lock`, and on demand, and keeps one open issue titled "Dependency advisories" listing what it finds. It closes that issue when the audit is clean. There's no ignore list: an advisory with no fix stays in that issue until one ships.
 
 ## Commit messages
 

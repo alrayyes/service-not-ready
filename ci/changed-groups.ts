@@ -49,6 +49,8 @@ const groups = {
 		/^package\.json$/,
 		/^bun\.lock$/,
 	],
+	// The dependency audit gate (advisory-scan) reads only the manifest and the lockfile.
+	deps: [/^(package\.json|bun\.lock)$/],
 };
 
 const workflow = ".github/workflows/ci.yml";
