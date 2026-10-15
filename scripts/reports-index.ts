@@ -11,6 +11,31 @@ interface Meta {
 const escapeHtml = (text: string) =>
 	text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
+// A page linking the files of one report directory by relative name. GitHub Pages has no
+// directory listing, so this is what makes the directory URL answer 200, and what the
+// catalogue reads to find the files in it.
+export function renderDirectoryIndex(title: string, files: string[]): string {
+	const items = files
+		.map((file) => `<li><a href="${escapeHtml(file)}">${escapeHtml(file)}</a></li>`)
+		.join("\n\t\t");
+	return `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>${escapeHtml(title)}</title>
+<style>:root{color-scheme:light dark}body{font:1rem/1.5 system-ui,sans-serif;max-width:40rem;margin:2rem auto;padding:0 1rem}</style>
+</head>
+<body>
+<h1>${escapeHtml(title)}</h1>
+<ul>
+\t\t${items}
+</ul>
+</body>
+</html>
+`;
+}
+
 export function renderIndex(files: string[], { sha, date }: Meta): string {
 	const items = files
 		.map((file) => `<li><a href="${escapeHtml(file)}">${escapeHtml(file)}</a></li>`)
@@ -51,13 +76,24 @@ function walk(dir: string, prefix = ""): string[] {
 
 // The entry points worth a link: the JUnit and coverage files, and each HTML view's index.
 const LISTED =
-	/^(tests\/.*\.xml|tests\/playwright\/index\.html|coverage\/(index\.html|coverage\.xml|lcov\.info))$/;
+	/^(tests\/.*\.xml|tests\/playwright\/index\.html|lighthouse\/index\.html|coverage\/(index\.html|coverage\.xml|lcov\.info))$/;
 
 if (import.meta.main) {
 	const dir = process.argv[2];
 	if (!dir || !existsSync(dir)) {
 		console.error("usage: bun scripts/reports-index.ts <reports dir>");
 		process.exit(1);
+	}
+	// Lighthouse CI writes the reports and a manifest, but no page to open the directory on.
+	const lighthouse = join(dir, "lighthouse");
+	if (existsSync(lighthouse)) {
+		writeFileSync(
+			join(lighthouse, "index.html"),
+			renderDirectoryIndex(
+				"Lighthouse reports",
+				walk(lighthouse).filter((file) => file !== "index.html"),
+			),
+		);
 	}
 	const files = walk(dir).filter((file) => LISTED.test(file));
 	const html = renderIndex(files, {

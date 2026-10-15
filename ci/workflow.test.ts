@@ -63,10 +63,16 @@ test("Codecov adds no status checks and no PR comment", () => {
 	expect(codecov.comment).toBe(false);
 });
 
-// An advisory with no patched version is the one justified ignore, ticketed (#46) and exact.
-test("the audit job ignores only GHSA-vfj7-8cjw-p6xm", () => {
+// An advisory with no patched version is the only justified ignore, and each is listed here
+// by ID: braces (#46), and the two against extract-zip, which @lhci/cli reaches through
+// lighthouse > puppeteer-core and which has no fix at any version.
+test("the audit job ignores only the advisories with no published fix", () => {
 	const run = (workflow.jobs.audit?.steps ?? []).map((s) => s.run ?? "").join("\n");
-	expect([...run.matchAll(/--ignore[= ](\S+)/g)].map((m) => m[1])).toEqual(["GHSA-vfj7-8cjw-p6xm"]);
+	expect([...run.matchAll(/--ignore[= ](\S+)/g)].map((m) => m[1])).toEqual([
+		"GHSA-vfj7-8cjw-p6xm",
+		"GHSA-jmr9-qjv8-65gv",
+		"GHSA-7pqw-9j4j-h8q3",
+	]);
 });
 
 // The three Markdown tiers (rules/markdown.md) are separate jobs, so a red run names the tier,
@@ -159,4 +165,32 @@ test("every Pages action is pinned by SHA", () => {
 	);
 	expect(pinned.length).toBeGreaterThan(0);
 	for (const s of pinned) expect(s.uses).toMatch(/@[0-9a-f]{40}$/);
+});
+
+// The Lighthouse report (service-not-ready#65): audited from the committed pages, published
+// beside the others, and proved at its live URL.
+test("the lighthouse job runs Lighthouse CI on the path group and uploads its report", () => {
+	const job = workflow.jobs.lighthouse as unknown as { if?: string; needs?: string; steps: Step[] };
+	expect(job).toBeDefined();
+	expect(job.needs).toBe("changes");
+	expect(job.if).toContain("needs.changes.outputs.lighthouse");
+	expect(job.steps.some((s) => s.run?.includes("lhci autorun"))).toBe(true);
+	const upload = job.steps.find((s) => s.uses?.startsWith("actions/upload-artifact@"));
+	expect(upload?.with?.name).toBe("report-lighthouse");
+	expect(upload?.with?.path).toBe("reports/lighthouse/");
+});
+
+test("the reports job puts the Lighthouse report under site/reports/lighthouse", () => {
+	const download = (workflow.jobs.reports?.steps ?? []).find(
+		(s) => s.uses?.startsWith("actions/download-artifact@") && s.with?.name === "report-lighthouse",
+	);
+	expect(download?.with?.path).toBe("site/reports/lighthouse");
+});
+
+test("the pages job checks the live Lighthouse index after the deploy", () => {
+	const steps = workflow.jobs.pages?.steps ?? [];
+	const deploy = steps.findIndex((s) => s.uses?.startsWith("actions/deploy-pages@"));
+	const check = steps.findIndex((s) => s.run?.includes("reports/lighthouse/"));
+	expect(check).toBeGreaterThan(deploy);
+	expect(steps[check]?.run).toContain("report.html");
 });

@@ -8,6 +8,7 @@ const none = {
 	prose: false,
 	markdown: false,
 	yaml: false,
+	lighthouse: false,
 };
 
 test("a docs-only change runs only the prose check", () => {
@@ -27,18 +28,19 @@ test.each([
 	[".hadolint.yaml", { dockerfile: true, yaml: true }],
 	[".dockerignore", { dockerfile: true, test: true }],
 	["Caddyfile", { test: true }],
-	["pages/404.html", { lint: true, test: true }],
-	["src/template.html", { lint: true, test: true }],
-	["scripts/build-pages.ts", { lint: true, test: true }],
+	["pages/404.html", { lint: true, test: true, lighthouse: true }],
+	["src/template.html", { lint: true, test: true, lighthouse: true }],
+	["scripts/build-pages.ts", { lint: true, test: true, lighthouse: true }],
 	["test/page.spec.ts", { lint: true, test: true }],
 	["playwright.config.ts", { lint: true, test: true }],
-	["package.json", { lint: true, test: true, markdown: true }],
-	["bun.lock", { lint: true, test: true, markdown: true }],
+	["package.json", { lint: true, test: true, markdown: true, lighthouse: true }],
+	["bun.lock", { lint: true, test: true, markdown: true, lighthouse: true }],
 	["biome.json", { lint: true }],
 	[".vale.ini", { prose: true }],
 	["styles/config/vocabularies/House/accept.txt", { prose: true }],
 	["scripts/lint-prose.sh", { prose: true }],
 	["ci/changed-groups.ts", { lint: true }],
+	["lighthouserc.json", { lint: true, lighthouse: true }],
 	["codecov.yml", { lint: true, yaml: true }],
 	// bun test ./ci reads its badges.
 	[".github/dependabot.yml", { yaml: true }],
@@ -61,6 +63,7 @@ test("editing the workflow runs every job", () => {
 		prose: true,
 		markdown: true,
 		yaml: true,
+		lighthouse: true,
 	});
 });
 
