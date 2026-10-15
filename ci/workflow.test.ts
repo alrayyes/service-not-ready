@@ -63,10 +63,16 @@ test("Codecov adds no status checks and no PR comment", () => {
 	expect(codecov.comment).toBe(false);
 });
 
-// An advisory with no patched version is the one justified ignore, ticketed (#46) and exact.
-test("the audit job ignores only GHSA-vfj7-8cjw-p6xm", () => {
+// An advisory with no patched version is the only justified ignore, and each is listed here
+// by ID: braces (#46), and the two against extract-zip, which @lhci/cli reaches through
+// lighthouse > puppeteer-core and which has no fix at any version.
+test("the audit job ignores only the advisories with no published fix", () => {
 	const run = (workflow.jobs.audit?.steps ?? []).map((s) => s.run ?? "").join("\n");
-	expect([...run.matchAll(/--ignore[= ](\S+)/g)].map((m) => m[1])).toEqual(["GHSA-vfj7-8cjw-p6xm"]);
+	expect([...run.matchAll(/--ignore[= ](\S+)/g)].map((m) => m[1])).toEqual([
+		"GHSA-vfj7-8cjw-p6xm",
+		"GHSA-jmr9-qjv8-65gv",
+		"GHSA-7pqw-9j4j-h8q3",
+	]);
 });
 
 // The three Markdown tiers (rules/markdown.md) are separate jobs, so a red run names the tier,

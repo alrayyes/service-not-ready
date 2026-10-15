@@ -211,13 +211,20 @@ jobs:
       - run: bun install --frozen-lockfile
       # Retried: bun audit talks to the npm registry, and a dropped connection fails the job
       # the same way a real advisory would. A genuine finding fails every attempt.
-      # One advisory is ignored, by ID (#46): GHSA-vfj7-8cjw-p6xm, `braces` stack exhaustion on
+      # Three advisories are ignored, by ID. GHSA-vfj7-8cjw-p6xm (#46): `braces` stack exhaustion on
       # deeply nested glob patterns. No patched version exists. It reaches us only through
       # markdownlint-cli2's globbing of our own committed Markdown, never untrusted patterns.
-      # Drop the ignore when braces ships a fix.
+      # Drop that ignore when braces ships a fix. GHSA-jmr9-qjv8-65gv and GHSA-7pqw-9j4j-h8q3
+      # are extract-zip, which @lhci/cli reaches through lighthouse > puppeteer-core; no
+      # version fixes either. It would only extract a browser download, which the lighthouse
+      # job never makes, since it uses the runner's own Chrome. Every other advisory in that
+      # tree has a fix and is overridden in package.json instead.
       - run: |
           for attempt in 1 2 3; do
-            timeout 60 bun audit --ignore=GHSA-vfj7-8cjw-p6xm && exit 0
+            timeout 60 bun audit \
+              --ignore=GHSA-vfj7-8cjw-p6xm \
+              --ignore=GHSA-jmr9-qjv8-65gv \
+              --ignore=GHSA-7pqw-9j4j-h8q3 && exit 0
             echo "bun audit failed (attempt ${attempt}/3), retrying in 10s..." >&2
             sleep 10
           done

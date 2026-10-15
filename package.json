@@ -22,8 +22,12 @@
 		"typecheck": "tsc --noEmit"
 	},
 	"overrides": {
+		"basic-ftp": "6.2.2",
+		"js-yaml": "5.4.3",
 		"katex": "0.19.0",
-		"smol-toml": "1.9.0"
+		"smol-toml": "1.9.0",
+		"tmp": "0.2.7",
+		"uuid": "11.1.1"
 	},
 	"devDependencies": {
 		"@axe-core/playwright": "4.13.0",
