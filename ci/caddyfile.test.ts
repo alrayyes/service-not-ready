@@ -1,7 +1,19 @@
 import { expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
 
-const caddyfile = readFileSync(new URL("../Caddyfile", import.meta.url), "utf8");
+import { stripComments } from "./caddyfile";
+
+// Comments out, or a directive commented out would still satisfy every check below.
+const caddyfile = stripComments(readFileSync(new URL("../Caddyfile", import.meta.url), "utf8"));
+
+test("a directive that is commented out does not count", () => {
+	const sample = ["handle {", '\t# error "service not ready" 503', "}"].join("\n");
+	expect(stripComments(sample)).not.toContain("error");
+});
+
+test("a trailing comment is dropped but its directive stays", () => {
+	expect(stripComments("encode zstd gzip # both")).toBe("encode zstd gzip");
+});
 
 // The block of a directive, found by its opening line and the matching closing brace.
 const block = (opening: string): string => {
