@@ -43,3 +43,42 @@ test("the 503 page stops its blinking cursor under reduced motion", () => {
 	);
 	expect(html).toContain("@media (prefers-reduced-motion:reduce){#status i{animation:none}}");
 });
+
+// What test/pages.spec.ts used to assert once per page in a browser. The pages share one
+// template, so this holds each of them to it in milliseconds; the browser keeps one poll page
+// and one static page to prove they render and behave.
+const rendered = PAGES.map((p) => ({ page: p, html: render(p) }));
+
+test.each(rendered)("$page.name has its own title and heading", ({ page, html }) => {
+	expect(html).toContain(`<title>${page.title}</title>`);
+	expect(html).toContain(`<h1>${page.heading}</h1>`);
+});
+
+test.each(rendered)("$page.name has a polite status line and no meta refresh", ({ html }) => {
+	expect(html).toContain('role="status" aria-live="polite"');
+	expect(html).not.toMatch(/<meta[^>]*http-equiv=["']?refresh/i);
+});
+
+test.each(rendered)("$page.name is one file that fetches nothing external", ({ html }) => {
+	expect(html).not.toMatch(/<link[^>]*rel=["']?stylesheet/i);
+	expect(html).not.toMatch(/<script[^>]*\ssrc=/i);
+	expect(html).not.toMatch(/<img[^>]*\ssrc=/i);
+	expect(html).not.toMatch(/(?:https?:)?\/\/[a-z0-9.-]+\.[a-z]{2,}/i);
+});
+
+test.each(rendered.filter((r) => r.page.kind === "poll"))(
+	"$page.name polls for its own status and says its own state",
+	({ page, html }) => {
+		expect(html).toContain(`r.status !== ${page.code}`);
+		expect(html).toContain(`still ${page.state}.`);
+	},
+);
+
+// Pages that never ask the server again: only the polling and countdown pages call fetch.
+test.each(rendered.filter((r) => r.page.kind === "back" || r.page.kind === "reload"))(
+	"$page.name never calls fetch or polls",
+	({ html }) => {
+		expect(html).not.toContain("fetch(");
+		expect(html).not.toContain("checking again");
+	},
+);
