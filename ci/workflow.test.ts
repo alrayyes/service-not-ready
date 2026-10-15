@@ -88,6 +88,28 @@ test("the audit job gates on what the change introduces, when the lockfile chang
 	expect(gate[0]?.with?.command).toBe("bun audit");
 });
 
+test("a scan of main keeps the advisory ticket, daily, on lockfile pushes and on dispatch", () => {
+	const scan = Bun.YAML.parse(
+		readFileSync(new URL("../.github/workflows/advisory-scan.yml", import.meta.url), "utf8"),
+	) as {
+		on: {
+			schedule: { cron: string }[];
+			push: { branches: string[]; paths: string[] };
+			workflow_dispatch: unknown;
+		};
+		jobs: Record<string, { permissions?: Record<string, string>; steps: Step[] }>;
+	};
+	expect(scan.on.schedule).toHaveLength(1);
+	expect(scan.on.push.branches).toEqual(["main"]);
+	expect(scan.on.push.paths).toEqual(expect.arrayContaining(["package.json", "bun.lock"]));
+	expect("workflow_dispatch" in scan.on).toBe(true);
+	const job = Object.values(scan.jobs)[0];
+	expect(job?.permissions).toEqual({ contents: "read", issues: "write" });
+	const step = job?.steps.find(advisoryScan);
+	expect(step?.with?.mode).toBe("scan");
+	expect(step?.with?.command).toBe("bun audit");
+});
+
 // The three Markdown tiers (rules/markdown.md) are separate jobs, so a red run names the tier,
 // and each is skipped when no Markdown changed.
 test.each(["markdown-format", "markdown-structure", "markdown-grammar"])(
