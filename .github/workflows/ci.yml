@@ -282,7 +282,7 @@ jobs:
 
   # Audits the committed 503 page, served as a static file with a 200 so Lighthouse accepts it.
   # Performance and best practices gate at 0.9; accessibility is axe's job in the test job,
-  # and SEO means nothing on an error page. The report is published with the others.
+  # and SEO isn't audited, since an error page is never indexed. The report is published with the others.
   lighthouse:
     needs: changes
     if: needs.changes.outputs.lighthouse == 'true'
