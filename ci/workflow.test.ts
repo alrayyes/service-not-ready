@@ -229,3 +229,12 @@ test("the pages job checks the live Lighthouse index after the deploy", () => {
 	expect(check).toBeGreaterThan(deploy);
 	expect(steps[check]?.run).toContain("report.html");
 });
+
+// release-please opens its pull request and adds `autorelease: pending` in a second call. The
+// job is gated on that label, so without `labeled` the opened run skips and nothing re-checks it.
+test("release-auto-merge re-runs when a label is added", () => {
+	const autoMerge = Bun.YAML.parse(
+		readFileSync(new URL("../.github/workflows/release-auto-merge.yml", import.meta.url), "utf8"),
+	) as { on: { pull_request: { types: string[] } } };
+	expect(autoMerge.on.pull_request.types).toEqual(["opened", "synchronize", "reopened", "labeled"]);
+});
