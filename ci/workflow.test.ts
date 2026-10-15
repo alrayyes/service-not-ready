@@ -1,5 +1,6 @@
 import { expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
+import { Glob } from "bun";
 
 interface Step {
 	name?: string;
@@ -63,16 +64,28 @@ test("Codecov adds no status checks and no PR comment", () => {
 	expect(codecov.comment).toBe(false);
 });
 
-// An advisory with no patched version is the only justified ignore, and each is listed here
-// by ID: braces (#46), and the two against extract-zip, which @lhci/cli reaches through
-// lighthouse > puppeteer-core and which has no fix at any version.
-test("the audit job ignores only the advisories with no published fix", () => {
-	const run = (workflow.jobs.audit?.steps ?? []).map((s) => s.run ?? "").join("\n");
-	expect([...run.matchAll(/--ignore[= ](\S+)/g)].map((m) => m[1])).toEqual([
-		"GHSA-vfj7-8cjw-p6xm",
-		"GHSA-jmr9-qjv8-65gv",
-		"GHSA-7pqw-9j4j-h8q3",
-	]);
+// rules/dependencies.md: a pull request fails only on advisories it introduces, and a scan
+// keeps everything already on main in one ticket (#73). No ignore list, anywhere.
+const workflowFiles = new Glob(".github/workflows/*.{yml,yaml}");
+const workflowTexts = [
+	...workflowFiles.scanSync({ cwd: new URL("..", import.meta.url).pathname, absolute: true }),
+].map((file) => readFileSync(file, "utf8"));
+
+test("no workflow ignores an advisory", () => {
+	expect(workflowTexts.length).toBeGreaterThan(0);
+	for (const text of workflowTexts) expect(text).not.toMatch(/--ignore[= ]/);
+});
+
+const advisoryScan = (s: Step) => /^alrayyes\/advisory-scan@[0-9a-f]{40}$/.test(s.uses ?? "");
+
+test("the audit job gates on what the change introduces, when the lockfile changes", () => {
+	const audit = workflow.jobs.audit as unknown as { if?: string; needs?: string; steps: Step[] };
+	expect(audit.needs).toBe("changes");
+	expect(audit.if).toContain("needs.changes.outputs.deps");
+	const gate = audit.steps.filter(advisoryScan);
+	expect(gate).toHaveLength(1);
+	expect(gate[0]?.with?.mode).toBe("gate");
+	expect(gate[0]?.with?.command).toBe("bun audit");
 });
 
 // The three Markdown tiers (rules/markdown.md) are separate jobs, so a red run names the tier,

@@ -9,6 +9,7 @@ const none = {
 	markdown: false,
 	yaml: false,
 	lighthouse: false,
+	deps: false,
 };
 
 test("a docs-only change runs only the prose check", () => {
@@ -33,8 +34,8 @@ test.each([
 	["scripts/build-pages.ts", { lint: true, test: true, lighthouse: true }],
 	["test/page.spec.ts", { lint: true, test: true }],
 	["playwright.config.ts", { lint: true, test: true }],
-	["package.json", { lint: true, test: true, markdown: true, lighthouse: true }],
-	["bun.lock", { lint: true, test: true, markdown: true, lighthouse: true }],
+	["package.json", { lint: true, test: true, markdown: true, lighthouse: true, deps: true }],
+	["bun.lock", { lint: true, test: true, markdown: true, lighthouse: true, deps: true }],
 	["biome.json", { lint: true }],
 	[".vale.ini", { prose: true }],
 	["styles/config/vocabularies/House/accept.txt", { prose: true }],
@@ -64,6 +65,7 @@ test("editing the workflow runs every job", () => {
 		markdown: true,
 		yaml: true,
 		lighthouse: true,
+		deps: true,
 	});
 });
 
