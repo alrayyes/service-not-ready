@@ -73,11 +73,15 @@ for (const p of PAGES) {
 
 			test("keeps polling while the error persists", async ({ page }) => {
 				await page.goto(c.url + path);
-				await page.route(c.url + path, (route) =>
-					route.fulfill({ status: p.code, body: "still down" }),
-				);
+				let polls = 0;
+				await page.route(c.url + path, (route) => {
+					polls += 1;
+					return route.fulfill({ status: p.code, body: "still down" });
+				});
 				await page.getByRole("button", { name: /retry now/i }).click();
 				await expect(page.getByRole("status")).toContainText(/still (starting|unavailable)/i);
+				expect(polls).toBe(1);
+				await expect(page.getByRole("button", { name: /retry now/i })).toBeEnabled();
 			});
 		} else if (p.name !== "429") {
 			test("never asks the server again", async ({ page }) => {
