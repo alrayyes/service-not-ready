@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.2](https://github.com/alrayyes/service-not-ready/compare/v0.4.1...v0.4.2) (2026-10-15)
+
+
+### Bug Fixes
+
+* bump caddy from `881bbc6` to `d8542f4` ([#60](https://github.com/alrayyes/service-not-ready/issues/60)) ([3a581ab](https://github.com/alrayyes/service-not-ready/commit/3a581ab6ace813aeb9f763f0c21f8f55464fb57d))
+
 ## [0.4.1](https://github.com/alrayyes/service-not-ready/compare/v0.4.0...v0.4.1) (2026-10-09)
 
 
