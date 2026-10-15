@@ -11,3 +11,4 @@ coverage/
 coverage.txt
 reports/
 site/
+.lighthouseci/

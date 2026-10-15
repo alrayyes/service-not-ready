@@ -32,6 +32,14 @@ const groups = {
 	],
 	// Every YAML file Prettier checks, and its config.
 	yaml: [/\.ya?ml$/, /^\.(prettierrc|prettierignore)$/],
+	// Lighthouse audits the committed pages, so it reads them, the template they come from
+	// and its own config.
+	lighthouse: [
+		/^(pages|src)\//,
+		/^scripts\/build-pages\.ts$/,
+		/^lighthouserc\.json$/,
+		/^(package\.json|bun\.lock)$/,
+	],
 	test: [
 		/^(Dockerfile|Caddyfile|\.dockerignore)$/,
 		/^(pages|src)\//,

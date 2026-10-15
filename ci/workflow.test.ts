@@ -160,3 +160,31 @@ test("every Pages action is pinned by SHA", () => {
 	expect(pinned.length).toBeGreaterThan(0);
 	for (const s of pinned) expect(s.uses).toMatch(/@[0-9a-f]{40}$/);
 });
+
+// The Lighthouse report (service-not-ready#65): audited from the committed pages, published
+// beside the others, and proved at its live URL.
+test("the lighthouse job runs Lighthouse CI on the path group and uploads its report", () => {
+	const job = workflow.jobs.lighthouse as unknown as { if?: string; needs?: string; steps: Step[] };
+	expect(job).toBeDefined();
+	expect(job.needs).toBe("changes");
+	expect(job.if).toContain("needs.changes.outputs.lighthouse");
+	expect(job.steps.some((s) => s.run?.includes("lhci autorun"))).toBe(true);
+	const upload = job.steps.find((s) => s.uses?.startsWith("actions/upload-artifact@"));
+	expect(upload?.with?.name).toBe("report-lighthouse");
+	expect(upload?.with?.path).toBe("reports/lighthouse/");
+});
+
+test("the reports job puts the Lighthouse report under site/reports/lighthouse", () => {
+	const download = (workflow.jobs.reports?.steps ?? []).find(
+		(s) => s.uses?.startsWith("actions/download-artifact@") && s.with?.name === "report-lighthouse",
+	);
+	expect(download?.with?.path).toBe("site/reports/lighthouse");
+});
+
+test("the pages job checks the live Lighthouse index after the deploy", () => {
+	const steps = workflow.jobs.pages?.steps ?? [];
+	const deploy = steps.findIndex((s) => s.uses?.startsWith("actions/deploy-pages@"));
+	const check = steps.findIndex((s) => s.run?.includes("reports/lighthouse/"));
+	expect(check).toBeGreaterThan(deploy);
+	expect(steps[check]?.run).toContain("report.html");
+});
