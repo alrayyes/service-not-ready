@@ -107,3 +107,14 @@ test("only 502, 503 and 504 poll, each for its own status", () => {
 		"r.status !== 503",
 	);
 });
+
+// A page with no icon link makes the browser ask for /favicon.ico. Behind Caddy that request
+// gets the error page's own status, so it is a failed resource in the console on every visit.
+test.each(PAGES.map((p) => p.name))(
+	"%s declares no icon so the browser never requests one",
+	(name) => {
+		const page = PAGES.find((p) => p.name === name);
+		if (!page) throw new Error(name);
+		expect(render(page)).toContain('<link rel="icon" href="data:,">');
+	},
+);
