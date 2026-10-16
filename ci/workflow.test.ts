@@ -215,6 +215,14 @@ test("the lighthouse job runs Lighthouse CI on the path group and uploads its re
 	expect(upload?.with?.path).toBe("reports/lighthouse/");
 });
 
+test("the lighthouse job renames the reports to stable names before uploading them", () => {
+	const job = workflow.jobs.lighthouse as unknown as { steps: Step[] };
+	const rename = job.steps.findIndex((s) => s.run?.includes("scripts/lighthouse-names.ts"));
+	const upload = job.steps.findIndex((s) => s.uses?.startsWith("actions/upload-artifact@"));
+	expect(rename).toBeGreaterThan(-1);
+	expect(rename).toBeLessThan(upload);
+});
+
 test("the reports job puts the Lighthouse report under site/reports/lighthouse", () => {
 	const download = (workflow.jobs.reports?.steps ?? []).find(
 		(s) => s.uses?.startsWith("actions/download-artifact@") && s.with?.name === "report-lighthouse",
