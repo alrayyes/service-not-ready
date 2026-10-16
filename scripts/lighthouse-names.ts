@@ -37,7 +37,10 @@ export function stabilizeReports(dir: string): void {
 			const ext = key === "htmlPath" ? "html" : "json";
 			const name = `${stem}.report.${ext}`;
 			const from = join(dir, base(entry[key]));
-			if (from !== join(dir, name) && existsSync(from)) renameSync(from, join(dir, name));
+			if (from !== join(dir, name)) {
+				if (!existsSync(from)) throw new Error(`manifest names ${from}, which does not exist`);
+				renameSync(from, join(dir, name));
+			}
 			const parent = dirname(entry[key]);
 			entry[key] = parent === "." ? name : `${parent}/${name}`;
 		}

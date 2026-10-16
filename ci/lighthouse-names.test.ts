@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { mkdtempSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { pageName, stabilizeReports } from "../scripts/lighthouse-names";
@@ -77,4 +77,12 @@ test("running it twice changes nothing", () => {
 	const once = readdirSync(dir).sort();
 	stabilizeReports(dir);
 	expect(readdirSync(dir).sort()).toEqual(once);
+});
+
+test("fails, leaving the manifest alone, when a file the manifest names is missing", () => {
+	const dir = fixture([entry("2026_10_16_12_00_00", true)]);
+	rmSync(join(dir, "localhost-503_html-2026_10_16_12_00_00.report.json"));
+	const before = readFileSync(join(dir, "manifest.json"), "utf8");
+	expect(() => stabilizeReports(dir)).toThrow("does not exist");
+	expect(readFileSync(join(dir, "manifest.json"), "utf8")).toBe(before);
 });

@@ -219,8 +219,10 @@ test("the lighthouse job renames the reports to stable names before uploading th
 	const job = workflow.jobs.lighthouse as unknown as { steps: Step[] };
 	const rename = job.steps.findIndex((s) => s.run?.includes("scripts/lighthouse-names.ts"));
 	const upload = job.steps.findIndex((s) => s.uses?.startsWith("actions/upload-artifact@"));
-	expect(rename).toBeGreaterThan(-1);
+	const collect = job.steps.findIndex((s) => s.run?.includes("lhci autorun"));
+	expect(rename).toBeGreaterThan(collect);
 	expect(rename).toBeLessThan(upload);
+	expect(job.steps[rename]?.run).toContain("reports/lighthouse");
 });
 
 test("the reports job puts the Lighthouse report under site/reports/lighthouse", () => {
