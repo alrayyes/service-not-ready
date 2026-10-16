@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.6](https://github.com/alrayyes/service-not-ready/compare/v0.4.5...v0.4.6) (2026-10-16)
+
+
+### Bug Fixes
+
+* upload the Lighthouse report when the score gate fails ([#88](https://github.com/alrayyes/service-not-ready/issues/88)) ([e894833](https://github.com/alrayyes/service-not-ready/commit/e894833ad057f508e764fb4f1dffc430226e369d)), closes [#86](https://github.com/alrayyes/service-not-ready/issues/86)
+
 ## [0.4.5](https://github.com/alrayyes/service-not-ready/compare/v0.4.4...v0.4.5) (2026-10-16)
 
 
