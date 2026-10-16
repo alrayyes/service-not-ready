@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.5](https://github.com/alrayyes/service-not-ready/compare/v0.4.4...v0.4.5) (2026-10-16)
+
+
+### Bug Fixes
+
+* publish Lighthouse reports under stable file names ([#85](https://github.com/alrayyes/service-not-ready/issues/85)) ([6d07ccf](https://github.com/alrayyes/service-not-ready/commit/6d07ccfc358910a4e7230be54ddf06484da25343))
+
 ## [0.4.4](https://github.com/alrayyes/service-not-ready/compare/v0.4.3...v0.4.4) (2026-10-16)
 
 
