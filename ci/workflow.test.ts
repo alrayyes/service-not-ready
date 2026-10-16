@@ -225,6 +225,15 @@ test("the lighthouse job renames the reports to stable names before uploading th
 	expect(job.steps[rename]?.run).toContain("reports/lighthouse");
 });
 
+// A failed score gate is the run whose report matters most (service-not-ready#86).
+test("the lighthouse job renames and uploads the reports even when the score gate fails", () => {
+	const job = workflow.jobs.lighthouse as unknown as { steps: Step[] };
+	const rename = job.steps.find((s) => s.run?.includes("scripts/lighthouse-names.ts"));
+	const upload = job.steps.find((s) => s.uses?.startsWith("actions/upload-artifact@"));
+	expect(rename?.if).toContain("!cancelled()");
+	expect(upload?.if).toContain("!cancelled()");
+});
+
 test("the reports job puts the Lighthouse report under site/reports/lighthouse", () => {
 	const download = (workflow.jobs.reports?.steps ?? []).find(
 		(s) => s.uses?.startsWith("actions/download-artifact@") && s.with?.name === "report-lighthouse",
