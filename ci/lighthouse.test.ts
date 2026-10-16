@@ -4,7 +4,10 @@ import { readFileSync } from "node:fs";
 const config = JSON.parse(
 	readFileSync(new URL("../lighthouserc.json", import.meta.url), "utf8"),
 ) as {
-	ci: { collect: { numberOfRuns: number; url: string[] }; assert: { aggregationMethod?: string } };
+	ci: {
+		collect: { numberOfRuns: number; url: string[]; settings: { onlyCategories?: string[] } };
+		assert: { aggregationMethod?: string };
+	};
 };
 
 // One run on a shared CI runner scored 0.84 on a page with no script worth measuring, and the
@@ -20,4 +23,13 @@ test("the assertions use the median run, not the best or the worst", () => {
 
 test("it audits the 503 page", () => {
 	expect(config.ci.collect.url).toEqual(["http://localhost/503.html"]);
+});
+
+// The page is an error page and is never indexed, so an SEO score is noise in the report.
+test("it audits every category except SEO", () => {
+	expect(config.ci.collect.settings.onlyCategories).toEqual([
+		"performance",
+		"accessibility",
+		"best-practices",
+	]);
 });

@@ -5,7 +5,8 @@
 			"url": ["http://localhost/503.html"],
 			"numberOfRuns": 3,
 			"settings": {
-				"chromeFlags": "--no-sandbox --disable-dev-shm-usage"
+				"chromeFlags": "--no-sandbox --disable-dev-shm-usage",
+				"onlyCategories": ["performance", "accessibility", "best-practices"]
 			}
 		},
 		"assert": {
@@ -22,8 +23,7 @@
 						"minScore": 0.9
 					}
 				],
-				"categories:accessibility": "off",
-				"categories:seo": "off"
+				"categories:accessibility": "off"
 			},
 			"aggregationMethod": "median-run"
 		},

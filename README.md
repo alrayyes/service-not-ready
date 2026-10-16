@@ -172,7 +172,7 @@ Every push to `main` that passes CI publishes its reports:
 - [Index](https://apis.ryankes.eu/service-not-ready/reports/), with the commit and date.
 - Tests: [unit](https://apis.ryankes.eu/service-not-ready/reports/tests/unit.xml) and [end-to-end](https://apis.ryankes.eu/service-not-ready/reports/tests/e2e.xml) results as JUnit XML, and the [Playwright report](https://apis.ryankes.eu/service-not-ready/reports/tests/playwright/index.html).
 - Coverage: the [HTML view](https://apis.ryankes.eu/service-not-ready/reports/coverage/), [Cobertura `coverage.xml`](https://apis.ryankes.eu/service-not-ready/reports/coverage/coverage.xml) and [`lcov.info`](https://apis.ryankes.eu/service-not-ready/reports/coverage/lcov.info). It covers only the unit tests of the tooling in `ci/`, since the Playwright tests drive a container.
-- Lighthouse: the [reports for the 503 page](https://apis.ryankes.eu/service-not-ready/reports/lighthouse/), as HTML and JSON. Performance and best practices must score 0.9; accessibility is axe's job in the end-to-end tests. The page is audited as a static file, since Lighthouse rejects a 503 response.
+- Lighthouse: the [reports for the 503 page](https://apis.ryankes.eu/service-not-ready/reports/lighthouse/), as HTML and JSON. Performance and best practices must score 0.9; accessibility is axe's job in the end-to-end tests, and SEO isn't audited because the pages are never indexed. The page is audited as a static file, since Lighthouse rejects a 503 response.
 
 ## Contributing
 
