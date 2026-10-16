@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.4](https://github.com/alrayyes/service-not-ready/compare/v0.4.3...v0.4.4) (2026-10-16)
+
+
+### Bug Fixes
+
+* declare no icon on the error pages ([#80](https://github.com/alrayyes/service-not-ready/issues/80)) ([402937b](https://github.com/alrayyes/service-not-ready/commit/402937b685ac5d23723d064c029b44e031b09e7e)), closes [#79](https://github.com/alrayyes/service-not-ready/issues/79)
+
 ## [0.4.3](https://github.com/alrayyes/service-not-ready/compare/v0.4.2...v0.4.3) (2026-10-16)
 
 
