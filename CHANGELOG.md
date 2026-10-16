@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.3](https://github.com/alrayyes/service-not-ready/compare/v0.4.2...v0.4.3) (2026-10-16)
+
+
+### Bug Fixes
+
+* **ci:** run release-auto-merge when the autorelease label is added ([#76](https://github.com/alrayyes/service-not-ready/issues/76)) ([b4412d1](https://github.com/alrayyes/service-not-ready/commit/b4412d14102e53fe0d1c9f77104599b10efc499d)), closes [#75](https://github.com/alrayyes/service-not-ready/issues/75)
+
 ## [0.4.2](https://github.com/alrayyes/service-not-ready/compare/v0.4.1...v0.4.2) (2026-10-15)
 
 
